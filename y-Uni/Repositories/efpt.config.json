@@ -1,0 +1,134 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "YUniContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "Repositories",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[dbo].[Assignments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AuditLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Budgets]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Discounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EventCategories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Events]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Expenses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ExpensesCategories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FinancialAccounts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Goals]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Investments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Invoices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MembershipPlans]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PaymentGateways]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PaymentMethods]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PriorityLevels]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Reminders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ReminderTemplates]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Role]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Subjects]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TimeLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Users]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false
+}
