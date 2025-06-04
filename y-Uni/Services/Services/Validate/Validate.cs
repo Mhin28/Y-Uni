@@ -13,7 +13,7 @@ namespace Services.Services.Validate
     public class Validate : IValidate
     {
         private readonly IUserRepo _userRepo;
-        public ValidateService(IUserRepo userRepo)
+        public Validate(IUserRepo userRepo)
         {
             _userRepo = userRepo;
         }
