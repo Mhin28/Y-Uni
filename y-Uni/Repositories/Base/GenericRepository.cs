@@ -3,6 +3,7 @@ using Repositories.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,7 +31,18 @@ namespace Repositories.Base
         {
             return await _context.Set<T>().ToListAsync();
         }
-        public void Create(T entity)
+		public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
+		{
+			IQueryable<T> query = _context.Set<T>();
+
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+
+			return await query.ToListAsync();
+		}
+		public void Create(T entity)
         {
             _context.Add(entity);
             _context.SaveChanges();
