@@ -3138,11 +3138,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj",
+      "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj",
       "projectName": "Services",
-      "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj",
+      "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj",
       "packagesPath": "C:\\Users\\minhv\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\obj\\",
+      "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3165,8 +3165,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj": {
-              "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj"
+            "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj": {
+              "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj"
             }
           }
         }

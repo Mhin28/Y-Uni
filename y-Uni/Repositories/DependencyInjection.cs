@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Repositories.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,8 @@ namespace Repositories
     {
         public static IServiceCollection AddRepository(this IServiceCollection services, IConfiguration configuration)
         {
+            var assembly = typeof(DependencyInjection).Assembly;
+            services.AddScoped<IUserRepo, UserRepo>();
             return services;
         }
     }

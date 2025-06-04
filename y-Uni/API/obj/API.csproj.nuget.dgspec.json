@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\API\\API.csproj": {}
+    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\API\\API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\API\\API.csproj": {
+    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\API\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\API\\API.csproj",
+        "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\API\\API.csproj",
         "projectName": "API",
-        "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\API\\API.csproj",
+        "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\API\\API.csproj",
         "packagesPath": "C:\\Users\\minhv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\API\\obj\\",
+        "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -34,8 +34,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj": {
-                "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj"
+              "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj": {
+                "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj"
               }
             }
           }
@@ -56,6 +56,22 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            },
+            "Microsoft.AspNetCore.Cors": {
+              "target": "Package",
+              "version": "[2.3.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
@@ -84,14 +100,14 @@
         }
       }
     },
-    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj": {
+    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj",
+        "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj",
         "projectName": "Repositories",
-        "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj",
+        "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj",
         "packagesPath": "C:\\Users\\minhv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\obj\\",
+        "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -175,14 +191,14 @@
         }
       }
     },
-    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj": {
+    "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj",
+        "projectUniqueName": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj",
         "projectName": "Services",
-        "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\Services.csproj",
+        "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\Services.csproj",
         "packagesPath": "C:\\Users\\minhv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Services\\obj\\",
+        "outputPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -205,8 +221,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj": {
-                "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\y-Uni\\Repositories\\Repositories.csproj"
+              "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj": {
+                "projectPath": "C:\\Users\\minhv\\OneDrive\\Desktop\\EXE201\\BE\\Y-Uni\\y-Uni\\Repositories\\Repositories.csproj"
               }
             }
           }
