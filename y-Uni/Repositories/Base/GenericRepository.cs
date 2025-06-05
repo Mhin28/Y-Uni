@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Base
 {
-    public class GenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected YUniContext _context;
 
@@ -31,7 +31,7 @@ namespace Repositories.Base
         {
             return await _context.Set<T>().ToListAsync();
         }
-		public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
+		public async Task<List<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
 		{
 			IQueryable<T> query = _context.Set<T>();
 
