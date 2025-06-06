@@ -16,7 +16,16 @@ namespace Repositories
         {
             var assembly = typeof(DependencyInjection).Assembly;
             services.AddScoped<IUserRepo, UserRepo>();
-            return services;
+            services.AddScoped<IAuditLogsRepo, AuditLogsRepo>();
+			services.AddScoped<IExpensesCategoryRepo, ExpensesCategoryRepo>();
+            services.AddScoped<IExpenseRepo, ExpenseRepo>();
+			services.AddScoped<IPaymentMethodRepo, PaymentMethodRepo>();
+            services.AddScoped<IFinancialAccountRepo, FinancialAccountRepo>();
+			// Add other repositories as needed
+			// Example: services.AddScoped<IExampleRepo, ExampleRepo>();
+			// Register DbContext if needed
+			// Example: services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+			return services;
         }
     }
 }

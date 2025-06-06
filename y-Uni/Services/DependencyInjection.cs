@@ -1,7 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Services.AccountService;
+using Services.Services.AuditLogService;
 using Services.Services.AuthenticateService;
+using Services.Services.ExpensesCategoryService;
+using Services.Services.ExpenseService;
+using Services.Services.FinancialAccountService;
+using Services.Services.PaymentMethodService;
 using Services.Services.TokenService;
 using Services.Services.UserService;
 using Services.Services.Validate;
@@ -18,7 +23,13 @@ namespace Services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IValidate, Validate>();
             services.AddScoped<ITokenService, TokenService>();
-            return services;
+            services.AddScoped<IExpenseService, ExpenseService>();
+            services.AddScoped<IExpensesCategoryService, ExpensesCategoryService>();
+			services.AddScoped<IPaymentMethodService, PaymentMethodService>();
+            services.AddScoped<IFinancialAccountService, FinancialAccountService>();
+            services.AddScoped<IAuditLogsService, AuditLogsService>();
+
+			return services;
         }
     }
 }
