@@ -11,7 +11,7 @@ namespace Services.Services.AuditLogService
 		Task<ResultModel> GetByUserIdAsync(Guid userId);
 		Task<ResultModel> AddAuditLogAsync(PostAuditLogModel model);
 		Task<ResultModel> DeleteAuditLogAsync(Guid logId);
-		Task<ResultModel> UpdateAuditLogAsync(AuditLog auditLog);
+		Task<ResultModel> UpdateAuditLogAsync(AuditLogModel model);
 		Task<ResultModel> GetAllAsync();
 		Task<ResultModel> GetByIdAsync(Guid logId);
 	}

@@ -96,25 +96,54 @@ namespace Services.Services.AuditLogService
 			return result;
 		}
 
-		public async Task<ResultModel> UpdateAuditLogAsync(AuditLog auditLog)
+		public async Task<ResultModel> UpdateAuditLogAsync(AuditLogModel model)
 		{
 			var result = new ResultModel();
+
+			if (model == null)
+			{
+				result.IsSuccess = false;
+				result.Code = (int)HttpStatusCode.BadRequest;
+				result.Message = "Invalid audit log model.";
+				return result;
+			}
+
 			try
 			{
-				await _auditLogRepo.UpdateAsync(auditLog);
+				var existingLog = await _auditLogRepo.GetByIdAsync(model.LogId);
+				if (existingLog == null)
+				{
+					result.IsSuccess = false;
+					result.Code = (int)HttpStatusCode.NotFound;
+					result.Message = "Audit log not found.";
+					return result;
+				}
+
+				existingLog.ActionTimestamp = model.ActionTimestamp;
+				existingLog.ActionType = model.ActionType;
+				existingLog.NewValues = model.NewValues;
+				existingLog.OldValues = model.OldValues;
+				existingLog.RecordId = model.RecordId;
+				existingLog.TableName = model.TableName;
+				existingLog.UserId = model.UserId;
+
+				await _auditLogRepo.UpdateAsync(existingLog);
+
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
-				result.Data = auditLog;
+				result.Data = existingLog;
 				result.Message = "Updated successfully.";
 			}
 			catch (Exception ex)
 			{
+
 				result.IsSuccess = false;
 				result.Code = (int)HttpStatusCode.InternalServerError;
-				result.Message = ex.Message;
+				result.Message = "An error occurred while updating the audit log.";
 			}
 			return result;
 		}
+
 
 		public async Task<ResultModel> GetAllAsync()
 		{
