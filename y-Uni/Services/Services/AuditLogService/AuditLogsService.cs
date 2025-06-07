@@ -49,6 +49,7 @@ namespace Services.Services.AuditLogService
 			{
 				var auditLog = new AuditLog
 				{
+					LogId = Guid.NewGuid(),
 					UserId = model.UserId,
 					ActionTimestamp = model.ActionTimestamp,
 					ActionType = model.ActionType,
@@ -61,6 +62,7 @@ namespace Services.Services.AuditLogService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
 				result.Data = auditLog;
+				result.Message = "Audit log created successfully.";
 			}
 			catch (Exception ex)
 			{

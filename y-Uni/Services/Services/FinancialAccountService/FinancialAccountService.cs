@@ -10,9 +10,9 @@ namespace Services.Services.FinancialAccountService
 {
 	public class FinancialAccountService : IFinancialAccountService
 	{
-		private readonly FinancialAccountRepo _repo;
+		private readonly IFinancialAccountRepo _repo;
 
-		public FinancialAccountService(FinancialAccountRepo repo)
+		public FinancialAccountService(IFinancialAccountRepo repo)
 		{
 			_repo = repo;
 		}
@@ -75,6 +75,7 @@ namespace Services.Services.FinancialAccountService
 			{
 				var financialAccount = new FinancialAccount
 				{
+					AccountId = Guid.NewGuid(),
 					AccountName = model.AccountName,
 					Balance = model.Balance,
 					CurrencyCode = model.CurrencyCode,
@@ -86,6 +87,7 @@ namespace Services.Services.FinancialAccountService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
 				result.Data = model;
+				result.Message = "FinancialAccount created successfully";
 			}
 			catch (Exception ex)
 			{
@@ -124,6 +126,7 @@ namespace Services.Services.FinancialAccountService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = existing;
+				result.Message = "FinancialAccount updated successfully";
 			}
 			catch (Exception ex)
 			{

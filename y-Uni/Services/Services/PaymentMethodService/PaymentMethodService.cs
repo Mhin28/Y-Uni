@@ -11,9 +11,9 @@ namespace Services.Services.PaymentMethodService
 {
 	public class PaymentMethodService : IPaymentMethodService
 	{
-		private readonly PaymentMethodRepo _repo;
+		private readonly IPaymentMethodRepo _repo;
 
-		public PaymentMethodService(PaymentMethodRepo repo)
+		public PaymentMethodService(IPaymentMethodRepo repo)
 		{
 			_repo = repo;
 		}
@@ -77,6 +77,7 @@ namespace Services.Services.PaymentMethodService
 			{
 				var paymentMethod = new PaymentMethod
 				{
+					MethodId = Guid.NewGuid(),
 					MethodName = model.MethodName,
 					IsActive = model.IsActive
 				};
@@ -84,6 +85,7 @@ namespace Services.Services.PaymentMethodService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
 				result.Data = model;
+				result.Message = "Payment method added successfully";
 			}
 			catch (Exception ex)
 			{
@@ -119,6 +121,7 @@ namespace Services.Services.PaymentMethodService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = existing;
+				result.Message = "Payment method updated successfully";
 			}
 			catch (Exception ex)
 			{
