@@ -11,9 +11,9 @@ namespace Services.Services.ExpenseService
 {
 	public class ExpenseService : IExpenseService
 	{
-		private readonly ExpenseRepo _repo;
+		private readonly IExpenseRepo _repo;
 
-		public ExpenseService(ExpenseRepo repo)
+		public ExpenseService(IExpenseRepo repo)
 		{
 			_repo = repo;
 		}
@@ -77,6 +77,7 @@ namespace Services.Services.ExpenseService
 			{
 				var expense = new Expense
 				{
+					ExpensesId = Guid.NewGuid(),
 					Amount = model.Amount,
 					Description = model.Description,
 					CreatedDate = DateTime.UtcNow,
@@ -91,6 +92,7 @@ namespace Services.Services.ExpenseService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
 				result.Data = model;
+				result.Message = "Expense created successfully";
 			}
 			catch (Exception ex)
 			{
@@ -133,6 +135,7 @@ namespace Services.Services.ExpenseService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = existing;
+				result.Message = "Expense updated successfully";
 			}
 			catch (Exception ex)
 			{

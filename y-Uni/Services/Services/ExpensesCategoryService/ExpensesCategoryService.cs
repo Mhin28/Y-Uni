@@ -11,9 +11,9 @@ namespace Services.Services.ExpensesCategoryService
 {
 	public class ExpensesCategoryService : IExpensesCategoryService
 	{
-		private readonly ExpensesCategoryRepo _repo;
+		private readonly IExpensesCategoryRepo _repo;
 
-		public ExpensesCategoryService(ExpensesCategoryRepo repo)
+		public ExpensesCategoryService(IExpensesCategoryRepo repo)
 		{
 			_repo = repo;
 		}
@@ -76,6 +76,7 @@ namespace Services.Services.ExpensesCategoryService
 			{
 				var expensesCategory = new ExpensesCategory
 				{
+					ExCid = Guid.NewGuid(),
 					CategoryName = model.CategoryName,
 					Description = model.Description
 				};
@@ -83,6 +84,7 @@ namespace Services.Services.ExpensesCategoryService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
 				result.Data = model;
+				result.Message = "Expense Category created successfully";
 			}
 			catch (Exception ex)
 			{
@@ -118,6 +120,7 @@ namespace Services.Services.ExpensesCategoryService
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = existing;
+				result.Message = "Updated successfully";
 			}
 			catch (Exception ex)
 			{
