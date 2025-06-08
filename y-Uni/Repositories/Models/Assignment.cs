@@ -25,6 +25,8 @@ public partial class Assignment
 
     public Guid? SubjectId { get; set; }
 
+    public Guid? UserId { get; set; }
+
     public virtual PriorityLevel Priority { get; set; }
 
     public virtual ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
@@ -32,4 +34,6 @@ public partial class Assignment
     public virtual Subject Subject { get; set; }
 
     public virtual ICollection<TimeLog> TimeLogs { get; set; } = new List<TimeLog>();
+    
+    public virtual User User { get; set; }
 }
