@@ -27,6 +27,8 @@ public partial class User
 
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
