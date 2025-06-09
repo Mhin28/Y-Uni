@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Services.AccountService;
+using Services.Services.AssignmentService;
 using Services.Services.AuditLogService;
 using Services.Services.AuthenticateService;
+using Services.Services.EventService;
 using Services.Services.ExpensesCategoryService;
 using Services.Services.ExpenseService;
 using Services.Services.FinancialAccountService;
@@ -28,6 +30,8 @@ namespace Services
 			services.AddScoped<IPaymentMethodService, PaymentMethodService>();
             services.AddScoped<IFinancialAccountService, FinancialAccountService>();
             services.AddScoped<IAuditLogsService, AuditLogsService>();
+            services.AddScoped<IAssignmentService, AssignmentService>();
+            services.AddScoped<IEventService, EventService>();
 
 			return services;
         }
