@@ -11,6 +11,7 @@ using Services.Services.ExpenseService;
 using Services.Services.FinancialAccountService;
 using Services.Services.PaymentMethodService;
 using Services.Services.PriorityLevelService;
+using Services.Services.SubjectService;
 using Services.Services.TokenService;
 using Services.Services.UserService;
 using Services.Services.Validate;
@@ -36,6 +37,7 @@ namespace Services
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IPriorityLevelService, PriorityLevelService>();
             services.AddScoped<IEventCategoryService, EventCategoryService>();
+            services.AddScoped<ISubjectService, SubjectService>();
 
 			return services;
         }
