@@ -4,6 +4,7 @@ using Services.Services.AccountService;
 using Services.Services.AssignmentService;
 using Services.Services.AuditLogService;
 using Services.Services.AuthenticateService;
+using Services.Services.EventCategoryService;
 using Services.Services.EventService;
 using Services.Services.ExpensesCategoryService;
 using Services.Services.ExpenseService;
@@ -34,6 +35,7 @@ namespace Services
             services.AddScoped<IAssignmentService, AssignmentService>();
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IPriorityLevelService, PriorityLevelService>();
+            services.AddScoped<IEventCategoryService, EventCategoryService>();
 
 			return services;
         }

@@ -28,6 +28,7 @@ namespace Repositories
             services.AddScoped<IAssignmentRepo, AssignmentRepo>();
             services.AddScoped<IEventRepo, EventRepo>();
             services.AddScoped<IPriorityLevelRepo, PriorityLevelRepo>();
+            services.AddScoped<IEventCategoryRepo, EventCategoryRepo>();
 
             return services;
         }
