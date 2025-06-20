@@ -184,9 +184,10 @@ namespace Repositories.Base
             //return await _context.Set<T>().FindAsync(code);
         }
 
-        #region Separating asigned entity and save operators        
 
-        public void PrepareCreate(T entity)
+		#region Separating asigned entity and save operators        
+
+		public void PrepareCreate(T entity)
         {
             _context.Add(entity);
         }
