@@ -30,8 +30,14 @@ namespace Repositories
             services.AddScoped<IPriorityLevelRepo, PriorityLevelRepo>();
             services.AddScoped<IEventCategoryRepo, EventCategoryRepo>();
             services.AddScoped<ISubjectRepo, SubjectRepo>();
+            services.AddScoped<IPaymentGatewayRepo, PaymentGatewayRepo>();
+            services.AddScoped<IDiscountRepo, DiscountRepo>();
+			services.AddScoped<IMembershipPlanRepo, MembershipPlanRepo>();
+            services.AddScoped<IInvoiceRepo, InvoiceRepo>();
+            services.AddScoped<IReminderTemplateRepo, ReminderTemplateRepo>();
+			services.AddScoped<IReminderRepo, ReminderRepo>();
 
-            return services;
+			return services;
         }
     }
 }
