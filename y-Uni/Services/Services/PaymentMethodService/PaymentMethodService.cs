@@ -115,8 +115,11 @@ namespace Services.Services.PaymentMethodService
 					return result;
 				}
 
-				existing.MethodName = model.MethodName;
-				existing.IsActive = model.IsActive;
+				if (!string.IsNullOrEmpty(model.MethodName))
+					existing.MethodName = model.MethodName;
+
+				if (model.IsActive.HasValue)
+					existing.IsActive = model.IsActive.Value;
 
 				await _repo.UpdateAsync(existing);
 

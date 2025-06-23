@@ -120,15 +120,33 @@ namespace Services.Services.ExpenseService
 					return result;
 				}
 
-				existing.Amount = model.Amount;
-				existing.Description = model.Description;
-				existing.CreatedDate = model.CreatedDate;
-				existing.Type = model.Type;
-				existing.Frequency = model.Frequency;
-				existing.NextDueDate = model.NextDueDate;
-				existing.ExCid = model.ExCid;
-				existing.AccountId = model.AccountId;
-				existing.UserId = model.UserId;
+				if (model.Amount.HasValue)
+					existing.Amount = model.Amount.Value;
+
+				if (!string.IsNullOrEmpty(model.Description))
+					existing.Description = model.Description;
+
+				if (model.CreatedDate.HasValue)
+					existing.CreatedDate = model.CreatedDate.Value;
+
+				if (!string.IsNullOrEmpty(model.Type))
+					existing.Type = model.Type;
+
+				if (!string.IsNullOrEmpty(model.Frequency))
+					existing.Frequency = model.Frequency;
+
+				if (model.NextDueDate.HasValue)
+					existing.NextDueDate = model.NextDueDate.Value;
+
+				if (model.ExCid.HasValue)
+					existing.ExCid = model.ExCid.Value;
+
+				if (model.AccountId.HasValue)
+					existing.AccountId = model.AccountId.Value;
+
+				if (model.UserId.HasValue)
+					existing.UserId = model.UserId.Value;
+
 
 				await _repo.UpdateAsync(existing);
 

@@ -10,15 +10,15 @@ namespace Repositories.ViewModels.ExpenseModel
 	{
 		public Guid ExpensesId { get; set; }
 
-		public decimal Amount { get; set; }
+		public decimal? Amount { get; set; }
 
-		public string Description { get; set; }
+		public string? Description { get; set; }
 
 		public DateTime? CreatedDate { get; set; }
 
-		public string Type { get; set; }
+		public string? Type { get; set; }
 
-		public string Frequency { get; set; }
+		public string? Frequency { get; set; }
 
 		public DateOnly? NextDueDate { get; set; }
 

@@ -10,7 +10,7 @@ namespace Repositories.ViewModels.PaymentMethodModel
 	{
 		public Guid MethodId { get; set; }
 
-		public string MethodName { get; set; }
+		public string? MethodName { get; set; }
 
 		public bool? IsActive { get; set; }
 
