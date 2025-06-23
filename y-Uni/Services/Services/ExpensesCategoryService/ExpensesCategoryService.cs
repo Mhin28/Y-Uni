@@ -112,8 +112,11 @@ namespace Services.Services.ExpensesCategoryService
 					return result;
 				}
 
-				existing.CategoryName = model.CategoryName;
-				existing.Description = model.Description;
+				if (!string.IsNullOrEmpty(model.CategoryName))
+					existing.CategoryName = model.CategoryName;
+
+				if (!string.IsNullOrEmpty(model.Description))
+					existing.Description = model.Description;
 
 				await _repo.UpdateAsync(existing);
 

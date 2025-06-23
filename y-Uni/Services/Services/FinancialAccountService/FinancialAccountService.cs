@@ -1,4 +1,5 @@
-﻿using Repositories.Models;
+﻿using Microsoft.IdentityModel.Tokens;
+using Repositories.Models;
 using Repositories.Repositories;
 using Repositories.ViewModels.FinancialAccountModel;
 using Repositories.ViewModels.ResultModels;
@@ -115,11 +116,20 @@ namespace Services.Services.FinancialAccountService
 					return result;
 				}
 
-				existing.AccountName = model.AccountName;
-				existing.Balance = model.Balance;
-				existing.CurrencyCode = model.CurrencyCode;
-				existing.UserId = model.UserId;
-				existing.IsDefault = model.IsDefault;
+				if (!string.IsNullOrEmpty(model.AccountName))
+					existing.AccountName = model.AccountName;
+
+				if (model.Balance.HasValue)
+					existing.Balance = model.Balance.Value;
+
+				if (!string.IsNullOrEmpty(model.CurrencyCode))
+					existing.CurrencyCode = model.CurrencyCode;
+
+				if (model.UserId.HasValue)
+					existing.UserId = model.UserId.Value;
+
+				if (model.IsDefault.HasValue)
+					existing.IsDefault = model.IsDefault.Value;
 
 				await _repo.UpdateAsync(existing);
 
