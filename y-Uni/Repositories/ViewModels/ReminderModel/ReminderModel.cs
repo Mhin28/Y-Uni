@@ -10,11 +10,11 @@ namespace Repositories.ViewModels.ReminderModel
 	{
 		public Guid ReminderId { get; set; }
 
-		public DateTime ReminderTime { get; set; }
+		public DateTime? ReminderTime { get; set; }
 
-		public string Status { get; set; }
+		public string? Status { get; set; }
 
-		public string NotificationChannel { get; set; }
+		public string? NotificationChannel { get; set; }
 
 		public Guid? EventId { get; set; }
 

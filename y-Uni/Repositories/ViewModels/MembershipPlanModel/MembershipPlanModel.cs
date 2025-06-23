@@ -10,10 +10,10 @@ namespace Repositories.ViewModels.MembershipPlanModel
 	{
 		public Guid MPid { get; set; }
 
-		public string PlanName { get; set; }
+		public string? PlanName { get; set; }
 
-		public decimal Price { get; set; }
+		public decimal? Price { get; set; }
 
-		public int DurationDays { get; set; }
+		public int? DurationDays { get; set; }
 	}
 }
