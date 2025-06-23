@@ -116,6 +116,7 @@ namespace Services.Services.PaymentGatewayService
 					result.Message = "Payment gateway not found.";
 					return result;
 				}
+
 				if (!string.IsNullOrEmpty(model.GatewayName))
 					updatedPaymentGateway.GatewayName = model.GatewayName;
 

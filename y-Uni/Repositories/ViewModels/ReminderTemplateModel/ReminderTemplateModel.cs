@@ -10,9 +10,9 @@ namespace Repositories.ViewModels.ReminderTemplateModel
 	{
 		public Guid TemplateId { get; set; }
 
-		public string TemplateName { get; set; }
+		public string? TemplateName { get; set; }
 
-		public string TriggerType { get; set; }
+		public string? TriggerType { get; set; }
 
 		public int? TriggerValue { get; set; }
 	}
