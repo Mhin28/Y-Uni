@@ -14,5 +14,7 @@ namespace Repositories.Repositories
         public Task<List<User>> GetAllUser();
         Task<User> GetByEmailAsync(string email);
         Task<User> AddAsync(User user);
+        Task<User> UpdateAsync(User user);
+        Task<User?> GetByIdAsync(Guid userId);
     }
 }
