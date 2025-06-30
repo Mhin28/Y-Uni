@@ -111,6 +111,109 @@ namespace Services.Services.UserService
             };
         }
 
+        public async Task<ResultModel> UpdateUserAsync(Guid userId, UpdateUserModel model)
+        {
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Update failed."
+            };
+
+            try
+            {
+                // Check if user exists
+                var existingUser = await _userRepo.GetByIdAsync(userId);
+                if (existingUser == null)
+                {
+                    result.Code = (int)HttpStatusCode.NotFound;
+                    result.Message = "User not found.";
+                    return result;
+                }
+
+                // Check if email is already in use by another user
+                if (!string.Equals(existingUser.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    var emailExists = await _userRepo.GetByEmailAsync(model.Email);
+                    if (emailExists != null && emailExists.UserId != userId)
+                    {
+                        result.Code = (int)HttpStatusCode.Conflict;
+                        result.Message = "This email is already in use by another account.";
+                        return result;
+                    }
+                }
+
+                // Update user properties
+                existingUser.FullName = model.FullName;
+                existingUser.Email = model.Email;
+                existingUser.DoB = model.DoB;
+                existingUser.UpdatedAt = DateTime.UtcNow;
+
+                // Save changes
+                var updatedUser = await _userRepo.UpdateAsync(existingUser);
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Message = "User updated successfully.";
+                result.Data = new
+                {
+                    UserId = updatedUser.UserId,
+                    FullName = updatedUser.FullName,
+                    Email = updatedUser.Email,
+                    DoB = updatedUser.DoB,
+                    UpdatedAt = updatedUser.UpdatedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ResultModel> GetUserByIdAsync(Guid userId)
+        {
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Invalid request."
+            };
+
+            try
+            {
+                var user = await _userRepo.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    result.Code = (int)HttpStatusCode.NotFound;
+                    result.Message = "User not found.";
+                    return result;
+                }
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Data = new
+                {
+                    UserId = user.UserId,
+                    FullName = user.FullName,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    DoB = user.DoB,
+                    IsVerified = user.IsVerified,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return result;
+        }
 
         private async Task<int> GenerateID()
         {

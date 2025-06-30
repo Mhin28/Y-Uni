@@ -26,5 +26,27 @@ namespace API.Controllers
             var res = await _userService.CreateUser(token, userModel);
             return StatusCode(res.Code, res);
         }
+        
+        // GET: api/User/{id}
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _userService.GetUserByIdAsync(id);
+            return StatusCode(result.Code, result);
+        }
+        
+        // PUT: api/User/{id}
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserModel model)
+        {
+            // Ensure the ID in the route matches the ID in the model
+            if (model.UserId != id)
+            {
+                model.UserId = id;
+            }
+            
+            var result = await _userService.UpdateUserAsync(id, model);
+            return StatusCode(result.Code, result);
+        }
     }
 }
