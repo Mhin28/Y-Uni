@@ -60,7 +60,7 @@ namespace Repositories.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
-        public async Task<bool> CheckRoleExists(Guid roleId)
+        public async Task<bool> CheckRoleExists(int roleId)
         {
             return await _context.Roles.AnyAsync(r => r.RoleId == roleId);
         }

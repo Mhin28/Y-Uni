@@ -84,7 +84,7 @@ namespace Services.Services.UserService
                     Message = "This email is already registered."
                 };
             }
-            var validRole = await _userRepo.CheckRoleExists((Guid)model.RoleId);
+            var validRole = await _userRepo.CheckRoleExists((int)model.RoleId);
             if (!validRole)
             {
                 return new ResultModel

@@ -8,7 +8,6 @@ namespace Repositories.ViewModels.UserModel
 {
     public class CreateUserModel
     {
-        public Guid UserId { get; set; }
 
         public string FullName { get; set; }
 
@@ -20,15 +19,6 @@ namespace Repositories.ViewModels.UserModel
 
         public string PasswordHash { get; set; }
 
-        public DateTime? LastLogin { get; set; }
-        public string Img { get; set; }
-
-        public Guid? RoleId { get; set; }
-
-        public DateTime? CreatedAt { get; set; }
-
-        public DateTime? UpdatedAt { get; set; }
-        public string VerificationCode { get; set; }
-        public DateTime? VerificationCodeExpiry { get; set; }
+        public int? RoleId { get; set; }
     }
 }
