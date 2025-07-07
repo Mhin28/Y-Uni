@@ -6,12 +6,15 @@ using Services.Services.AccountService;
 using Services.Services.AuthenticateService;
 using Services.Services.TokenService;
 using Services.Services.Validate;
+using Services.Services.EmailService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Mail;
+using System.Net;
 
 namespace Services.Services.UserService
 {
@@ -22,11 +25,13 @@ namespace Services.Services.UserService
         private readonly IAccountService _accountService;
         private readonly IAuthenticateService _authentocateService;
         private readonly ITokenService _token;
+        private readonly IEmailService _emailService;
         public UserService(IUserRepo userRepo,
             ITokenService token,
             IAuthenticateService authenticateService,
             IAccountService accountService,
-            IValidate userValidate
+            IValidate userValidate,
+            IEmailService emailService
             )
         {
             _userRepo = userRepo;
@@ -34,7 +39,7 @@ namespace Services.Services.UserService
             _authentocateService = authenticateService;
             _accountService = accountService;
             _Validate = userValidate;
-
+            _emailService = emailService;
         }
         public async Task<ResultModel> CreateUser(string token, CreateUserModel model)
         {
@@ -45,7 +50,6 @@ namespace Services.Services.UserService
                 Message = "Invalid request."
             };
 
-            // Optional: Validate token only if required
             if (!string.IsNullOrEmpty(token))
             {
                 var decodeModel = _token.decode(token);
@@ -80,8 +84,19 @@ namespace Services.Services.UserService
                     Message = "This email is already registered."
                 };
             }
+            var validRole = await _userRepo.CheckRoleExists((Guid)model.RoleId);
+            if (!validRole)
+            {
+                return new ResultModel
+                {
+                    IsSuccess = false,
+                    Code = (int)HttpStatusCode.BadRequest,
+                    Message = "RoleId không hợp lệ."
+                };
+            }
 
             string hashedPassword = HashPass.HashPass.HashPassword(model.PasswordHash);
+            var code = new Random().Next(100000, 999999).ToString();
             var user = new User
             {
                 UserId = Guid.NewGuid(),
@@ -91,18 +106,23 @@ namespace Services.Services.UserService
                 DoB = model.DoB,
                 PasswordHash = hashedPassword,
                 LastLogin = null,
+                Img = null,
                 IsVerified = false,
+                RoleId = model.RoleId,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                VerificationCode = code,
+                VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(10)
             };
 
             await _userRepo.AddAsync(user);
+            await _emailService.SendVerificationEmailAsync(user.Email, code);
 
             return new ResultModel
             {
                 IsSuccess = true,
                 Code = (int)HttpStatusCode.Created,
-                Message = "User created successfully",
+                Message = "User created successfully. Verification code sent to email.",
                 Data = new
                 {
                     Email = user.Email,
@@ -215,11 +235,102 @@ namespace Services.Services.UserService
             return result;
         }
 
-        private async Task<int> GenerateID()
+        public async Task<ResultModel> VerifyEmailAsync(string email, string code)
         {
-            var userList = await _userRepo.GetAllUser();
-            int userLength = userList.Count() + 1;
-            return userLength;
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Invalid or expired code."
+            };
+
+            try
+            {
+                var user = await _userRepo.GetByEmailAsync(email);
+                if (user == null)
+                {
+                    result.Code = (int)HttpStatusCode.NotFound;
+                    result.Message = "User not found.";
+                    return result;
+                }
+                if (user.VerificationCode != code || user.VerificationCodeExpiry < DateTime.UtcNow)
+                {
+                    result.Code = (int)HttpStatusCode.BadRequest;
+                    result.Message = "Invalid or expired code.";
+                    return result;
+                }
+
+                user.IsVerified = true;
+                user.VerificationCode = null;
+                user.VerificationCodeExpiry = null;
+
+                var updatedUser = await _userRepo.UpdateVerifyAsync(user);
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Email verified successfully.";
+                result.Data = new
+                {
+                    UserId = updatedUser.UserId,
+                    Email = updatedUser.Email,
+                    IsVerified = updatedUser.IsVerified
+                };
+            }
+            catch (Exception ex)
+            {
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ResultModel> ResendVerificationCodeAsync(string email)
+        {
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "User not found."
+            };
+
+            try
+            {
+                // Lấy user theo email
+                var user = await _userRepo.GetByEmailAsync(email);
+                if (user == null)
+                {
+                    result.Code = (int)HttpStatusCode.NotFound;
+                    result.Message = "User not found.";
+                    return result;
+                }
+
+                var code = new Random().Next(100000, 999999).ToString();
+                user.VerificationCode = code;
+                user.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(10);
+                user.IsVerified = false;
+
+                var updatedUser = await _userRepo.UpdateVerifyAsync(user);
+                await _emailService.SendVerificationEmailAsync(user.Email, code);
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Verification code resent successfully.";
+                result.Data = new
+                {
+                    UserId = updatedUser.UserId,
+                    Email = updatedUser.Email,
+                    VerificationCode = code,
+                    VerificationCodeExpiry = updatedUser.VerificationCodeExpiry
+                };
+            }
+            catch (Exception ex)
+            {
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return result;
         }
     }
 }

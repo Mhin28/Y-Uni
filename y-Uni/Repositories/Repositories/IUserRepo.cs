@@ -16,5 +16,7 @@ namespace Repositories.Repositories
         Task<User> AddAsync(User user);
         Task<User> UpdateAsync(User user);
         Task<User?> GetByIdAsync(Guid userId);
+        Task<bool> CheckRoleExists(Guid roleId);
+        Task<User> UpdateVerifyAsync(User model);
     }
 }

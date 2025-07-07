@@ -5,6 +5,7 @@ using Services.Services.AssignmentService;
 using Services.Services.AuditLogService;
 using Services.Services.AuthenticateService;
 using Services.Services.DiscountService;
+using Services.Services.EmailService;
 using Services.Services.EventCategoryService;
 using Services.Services.EventService;
 using Services.Services.ExpensesCategoryService;
@@ -50,8 +51,9 @@ namespace Services
 			services.AddScoped<IInvoiceService, InvoiceService>();
             services.AddScoped<IReminderTemplateService, ReminderTemplateService>();
             services.AddScoped<IReminderService, ReminderService>();
+            services.AddScoped<IEmailService, EmailService>();
 
-			return services;
+            return services;
         }
     }
 }

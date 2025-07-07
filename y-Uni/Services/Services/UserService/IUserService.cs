@@ -13,5 +13,7 @@ namespace Services.Services.UserService
         Task<ResultModel> CreateUser(string token, CreateUserModel model);
         Task<ResultModel> UpdateUserAsync(Guid userId, UpdateUserModel model);
         Task<ResultModel> GetUserByIdAsync(Guid userId);
+        Task<ResultModel> VerifyEmailAsync(string email, string code);
+        Task<ResultModel> ResendVerificationCodeAsync(string email);
     }
 }

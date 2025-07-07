@@ -48,5 +48,19 @@ namespace API.Controllers
             var result = await _userService.UpdateUserAsync(id, model);
             return StatusCode(result.Code, result);
         }
+        [HttpPost("verify")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailModel model)
+        {
+            var result = await _userService.VerifyEmailAsync(model.Email, model.Code);
+            return StatusCode(result.Code, result);
+        }
+        [HttpPost("resend-verification")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendVerificationCode([FromBody] ResendVerificationModel model)
+        {
+            var result = await _userService.ResendVerificationCodeAsync(model.Email);
+            return StatusCode(result.Code, result);
+        }
     }
 }
