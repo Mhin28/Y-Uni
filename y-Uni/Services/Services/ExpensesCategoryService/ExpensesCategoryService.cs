@@ -78,6 +78,7 @@ namespace Services.Services.ExpensesCategoryService
 				{
 					ExCid = Guid.NewGuid(),
 					CategoryName = model.CategoryName,
+					Type = model.Type,
 					Description = model.Description
 				};
 				await _repo.CreateAsync(expensesCategory);

@@ -1,19 +1,19 @@
-﻿using Repositories.Models;
+using Repositories.Models;
 using Repositories.Repositories;
-using Repositories.ViewModels.ExpenseModel;
+using Repositories.ViewModels.BudgetModel;
 using Repositories.ViewModels.ResultModels;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Services.Services.ExpenseService
+namespace Services.Services.BudgetService
 {
-	public class ExpenseService : IExpenseService
+	public class BudgetService : IBudgetService
 	{
-		private readonly IExpenseRepo _repo;
+		private readonly IBudgetRepo _repo;
 
-		public ExpenseService(IExpenseRepo repo)
+		public BudgetService(IBudgetRepo repo)
 		{
 			_repo = repo;
 		}
@@ -23,10 +23,10 @@ namespace Services.Services.ExpenseService
 			var result = new ResultModel();
 			try
 			{
-				var expenses = await _repo.GetAllAsync(e => e.Account, e => e.ExC, e => e.User);
+				var budgets = await _repo.GetAllAsync(b => b.Account, b => b.Category, b => b.User);
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
-				result.Data = expenses;
+				result.Data = budgets;
 			}
 			catch (Exception ex)
 			{
@@ -39,21 +39,20 @@ namespace Services.Services.ExpenseService
 
 		public async Task<ResultModel> GetByIdAsync(Guid id)
 		{
-			
 			var result = new ResultModel();
 			try
 			{
-				var expense = await _repo.GetByIdAsync(id);
-				if (expense == null)
+				var budget = await _repo.GetByIdAsync(id);
+				if (budget == null)
 				{
 					result.IsSuccess = false;
 					result.Code = (int)HttpStatusCode.NotFound;
-					result.Message = "Expense not found.";
+					result.Message = "Budget not found.";
 					return result;
 				}
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
-				result.Data = expense;
+				result.Data = budget;
 			}
 			catch (Exception ex)
 			{
@@ -64,7 +63,7 @@ namespace Services.Services.ExpenseService
 			return result;
 		}
 
-		public async Task<ResultModel> AddAsync(PostExpenseModel model)
+		public async Task<ResultModel> AddAsync(PostBudgetModel model)
 		{
 			var result = new ResultModel
 			{
@@ -75,21 +74,21 @@ namespace Services.Services.ExpenseService
 
 			try
 			{
-				var expense = new Expense
+				var budget = new Budget
 				{
-					ExpensesId = Guid.NewGuid(),
-					Amount = model.Amount,
-					Description = model.Description,
-					CreatedDate = DateTime.UtcNow,
-					ExCid = model.ExCid,
+					BudgetId = Guid.NewGuid(),
+					CategoryId = model.CategoryId,
 					AccountId = model.AccountId,
+					BudgetAmount = model.BudgetAmount,
+					StartDate = model.StartDate,
+					EndDate = model.EndDate,
 					UserId = model.UserId
 				};
-				await _repo.CreateAsync(expense);
+				await _repo.CreateAsync(budget);
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
 				result.Data = model;
-				result.Message = "Expense created successfully";
+				result.Message = "Budget created successfully";
 			}
 			catch (Exception ex)
 			{
@@ -99,7 +98,7 @@ namespace Services.Services.ExpenseService
 			return result;
 		}
 
-		public async Task<ResultModel> UpdateAsync(ExpenseModel model)
+		public async Task<ResultModel> UpdateAsync(BudgetModel model)
 		{
 			var result = new ResultModel
 			{
@@ -110,38 +109,37 @@ namespace Services.Services.ExpenseService
 
 			try
 			{
-				var existing = await _repo.GetByIdAsync(model.ExpensesId);
+				var existing = await _repo.GetByIdAsync(model.BudgetId);
 				if (existing == null)
 				{
-					result.Message = "Expense not found";
+					result.Message = "Budget not found";
 					return result;
 				}
 
-				if (model.Amount.HasValue)
-					existing.Amount = model.Amount.Value;
-
-				if (!string.IsNullOrEmpty(model.Description))
-					existing.Description = model.Description;
-
-				if (model.CreatedDate.HasValue)
-					existing.CreatedDate = model.CreatedDate.Value;
-
-				if (model.ExCid.HasValue)
-					existing.ExCid = model.ExCid.Value;
+				if (model.CategoryId.HasValue)
+					existing.CategoryId = model.CategoryId.Value;
 
 				if (model.AccountId.HasValue)
 					existing.AccountId = model.AccountId.Value;
 
+				if (model.BudgetAmount.HasValue)
+					existing.BudgetAmount = model.BudgetAmount.Value;
+
+				if (model.StartDate.HasValue)
+					existing.StartDate = model.StartDate.Value;
+
+				if (model.EndDate.HasValue)
+					existing.EndDate = model.EndDate.Value;
+
 				if (model.UserId.HasValue)
 					existing.UserId = model.UserId.Value;
-
 
 				await _repo.UpdateAsync(existing);
 
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = existing;
-				result.Message = "Expense updated successfully";
+				result.Message = "Budget updated successfully";
 			}
 			catch (Exception ex)
 			{
@@ -165,7 +163,7 @@ namespace Services.Services.ExpenseService
 				var model = await _repo.GetByIdAsync(id);
 				if (model == null)
 				{
-					result.Message = "Expense not found";
+					result.Message = "Budget not found";
 					return result;
 				}
 
