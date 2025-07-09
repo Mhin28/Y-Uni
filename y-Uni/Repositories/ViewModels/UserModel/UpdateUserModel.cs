@@ -5,7 +5,6 @@ namespace Repositories.ViewModels.UserModel
 {
     public class UpdateUserModel
     {
-        public Guid UserId { get; set; }
 
         public string FullName { get; set; }
 
@@ -13,7 +12,6 @@ namespace Repositories.ViewModels.UserModel
 
         public DateOnly? DoB { get; set; }
 
-        // Password is handled separately for security reasons
 
     }
 } 

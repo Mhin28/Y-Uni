@@ -23,7 +23,7 @@ namespace Repositories.ViewModels.AutheticateModel
         public DateTime? LastLogin { get; set; }
         public string Img { get; set; }
 
-        public Guid? RoleId { get; set; }
+        public int? RoleId { get; set; }
 
         public bool? IsVerified { get; set; }
 

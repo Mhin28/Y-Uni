@@ -34,19 +34,13 @@ namespace API.Controllers
             var result = await _userService.GetUserByIdAsync(id);
             return StatusCode(result.Code, result);
         }
-        
-        // PUT: api/User/{id}
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserModel model)
+
+        [HttpPut("update-account")]
+        public async Task<IActionResult> UpdateAccount([FromBody] UpdateUserModel model)
         {
-            // Ensure the ID in the route matches the ID in the model
-            if (model.UserId != id)
-            {
-                model.UserId = id;
-            }
-            
-            var result = await _userService.UpdateUserAsync(id, model);
-            return StatusCode(result.Code, result);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _userService.UpdateAccountLogin(token, model);
+            return StatusCode(res.Code, res);
         }
         [HttpPost("verify")]
         [AllowAnonymous]
@@ -61,6 +55,20 @@ namespace API.Controllers
         {
             var result = await _userService.ResendVerificationCodeAsync(model.Email);
             return StatusCode(result.Code, result);
+        }
+        [HttpGet("logged-in-user")]
+        public async Task<IActionResult> GetLoggedInUser()
+        {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _userService.GetLoggedInUser(token);
+            return StatusCode(res.Code, res);
+        }
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _userService.ChangePassword(token, model);
+            return StatusCode(res.Code, res);
         }
     }
 }
