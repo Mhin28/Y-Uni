@@ -78,3 +78,6 @@ scope.txt
 prd.txt
 remainingtask.txt
 taskdone.txt
+# Firebase service account key
+Keys/
+*.json
