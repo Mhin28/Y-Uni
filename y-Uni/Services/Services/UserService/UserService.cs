@@ -131,66 +131,76 @@ namespace Services.Services.UserService
             };
         }
 
-        public async Task<ResultModel> UpdateUserAsync(Guid userId, UpdateUserModel model)
+        public async Task<ResultModel> UpdateAccountLogin(string token, UpdateUserModel model)
         {
-            var result = new ResultModel
+            var res = new ResultModel
             {
                 IsSuccess = false,
                 Code = (int)HttpStatusCode.BadRequest,
-                Message = "Update failed."
+                Message = "Cập nhật thất bại."
             };
 
-            try
+            if (string.IsNullOrEmpty(token))
             {
-                // Check if user exists
-                var existingUser = await _userRepo.GetByIdAsync(userId);
-                if (existingUser == null)
-                {
-                    result.Code = (int)HttpStatusCode.NotFound;
-                    result.Message = "User not found.";
-                    return result;
-                }
-
-                // Check if email is already in use by another user
-                if (!string.Equals(existingUser.Email, model.Email, StringComparison.OrdinalIgnoreCase))
-                {
-                    var emailExists = await _userRepo.GetByEmailAsync(model.Email);
-                    if (emailExists != null && emailExists.UserId != userId)
-                    {
-                        result.Code = (int)HttpStatusCode.Conflict;
-                        result.Message = "This email is already in use by another account.";
-                        return result;
-                    }
-                }
-
-                // Update user properties
-                existingUser.FullName = model.FullName;
-                existingUser.Email = model.Email;
-                existingUser.DoB = model.DoB;
-                existingUser.UpdatedAt = DateTime.UtcNow;
-
-                // Save changes
-                var updatedUser = await _userRepo.UpdateAsync(existingUser);
-
-                result.IsSuccess = true;
-                result.Code = (int)HttpStatusCode.OK;
-                result.Message = "User updated successfully.";
-                result.Data = new
-                {
-                    UserId = updatedUser.UserId,
-                    FullName = updatedUser.FullName,
-                    Email = updatedUser.Email,
-                    DoB = updatedUser.DoB,
-                    UpdatedAt = updatedUser.UpdatedAt
-                };
-            }
-            catch (Exception ex)
-            {
-                result.Code = (int)HttpStatusCode.InternalServerError;
-                result.Message = $"An error occurred: {ex.Message}";
+                res.Code = (int)HttpStatusCode.Unauthorized;
+                res.Message = "Token không hợp lệ.";
+                return res;
             }
 
-            return result;
+            var decodedUser = _token.decode(token);
+            if (decodedUser == null || string.IsNullOrEmpty(decodedUser.userid))
+            {
+                res.Code = (int)HttpStatusCode.Unauthorized;
+                res.Message = "Token không hợp lệ.";
+                return res;
+            }
+
+            if (!Guid.TryParse(decodedUser.userid, out Guid userId))
+            {
+                res.Code = (int)HttpStatusCode.Unauthorized;
+                res.Message = "Token không hợp lệ.";
+                return res;
+            }
+
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+            {
+                res.Code = (int)HttpStatusCode.NotFound;
+                res.Message = "Không tìm thấy người dùng.";
+                return res;
+            }
+            
+            if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var emailExists = await _userRepo.GetByEmailAsync(model.Email);
+                if (emailExists != null && emailExists.UserId != userId)
+                {
+                    res.Code = (int)HttpStatusCode.Conflict;
+                    res.Message = "Email đã được sử dụng.";
+                    return res;
+                }
+            }
+            if (!string.IsNullOrEmpty(model.FullName))
+                user.FullName = model.FullName;
+            if (!string.IsNullOrEmpty(model.Email))
+                user.Email = model.Email;
+            if (model.DoB.HasValue && model.DoB.Value != default(DateOnly))
+                user.DoB = model.DoB;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepo.UpdateAsync(user);
+
+            res.IsSuccess = true;
+            res.Code = (int)HttpStatusCode.OK;
+            res.Message = "Cập nhật thành công.";
+            res.Data = new
+            {
+                user.UserId,
+                user.FullName,
+                user.Email,
+                user.DoB
+            };
+            return res;
         }
 
         public async Task<ResultModel> GetUserByIdAsync(Guid userId)
@@ -331,6 +341,127 @@ namespace Services.Services.UserService
             }
 
             return result;
+        }
+
+        public async Task<ResultModel> ChangePassword(string token, ChangePasswordModel model)
+        {
+            var res = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Đổi mật khẩu thất bại."
+            };
+
+            if (string.IsNullOrEmpty(token))
+            {
+                res.Code = (int)HttpStatusCode.Unauthorized;
+                res.Message = "Token không hợp lệ.";
+                return res;
+            }
+
+            var decodedUser = _token.decode(token);
+            if (decodedUser == null || string.IsNullOrEmpty(decodedUser.userid))
+            {
+                res.Code = (int)HttpStatusCode.Unauthorized;
+                res.Message = "Token không hợp lệ.";
+                return res;
+            }
+
+            if (!Guid.TryParse(decodedUser.userid, out Guid userId))
+            {
+                res.Code = (int)HttpStatusCode.Unauthorized;
+                res.Message = "Token không hợp lệ.";
+                return res;
+            }
+
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+            {
+                res.Code = (int)HttpStatusCode.NotFound;
+                res.Message = "Không tìm thấy người dùng.";
+                return res;
+            }
+
+            if (user.RoleId != 1 && user.RoleId != 2)
+            {
+                res.Code = (int)HttpStatusCode.Forbidden;
+                res.Message = "Bạn không có quyền đổi mật khẩu.";
+                return res;
+            }
+
+            if (!HashPass.HashPass.VerifyPassword(model.OldPassword, user.PasswordHash))
+            {
+                res.Code = (int)HttpStatusCode.BadRequest;
+                res.Message = "Mật khẩu cũ không đúng.";
+                return res;
+            }
+
+            user.PasswordHash = HashPass.HashPass.HashPassword(model.NewPassword);
+            await _userRepo.UpdateAsync(user);
+
+            res.IsSuccess = true;
+            res.Code = (int)HttpStatusCode.OK;
+            res.Message = "Đổi mật khẩu thành công.";
+            return res;
+        }
+
+        public async Task<ResultModel> GetLoggedInUser(string token)
+        {
+            var res = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.Unauthorized,
+                Message = "Invalid token."
+            };
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return res;
+            }
+
+            var decodedUser = _token.decode(token);
+            if (decodedUser == null || string.IsNullOrEmpty(decodedUser.userid))
+            {
+                return res;
+            }
+
+            if (!Guid.TryParse(decodedUser.userid, out Guid userId))
+            {
+                return res;
+            }
+            if (userId == Guid.Empty)
+            {
+                return res;
+            }
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return new ResultModel
+                {
+                    IsSuccess = false,
+                    Code = (int)HttpStatusCode.NotFound,
+                    Message = "User not found."
+                };
+            }
+
+            return new ResultModel
+            {
+                IsSuccess = true,
+                Code = (int)HttpStatusCode.OK,
+                Message = "User retrieved successfully.",
+                Data = new
+                {
+                    user.UserId,
+                    user.FullName,
+                    user.UserName,
+                    user.Email,
+                    user.DoB,
+                    user.Img,
+                    user.CreatedAt,
+                    user.UpdatedAt,
+                    user.RoleId,
+                }
+            };
         }
     }
 }
