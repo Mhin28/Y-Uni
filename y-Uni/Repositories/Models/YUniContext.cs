@@ -20,8 +20,6 @@ public partial class YUniContext : DbContext
 
     public virtual DbSet<Assignment> Assignments { get; set; }
 
-    public virtual DbSet<AuditLog> AuditLogs { get; set; }
-
     public virtual DbSet<Budget> Budgets { get; set; }
 
     public virtual DbSet<Discount> Discounts { get; set; }
@@ -58,8 +56,6 @@ public partial class YUniContext : DbContext
 
     public virtual DbSet<Subject> Subjects { get; set; }
 
-    public virtual DbSet<TimeLog> TimeLogs { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
 
     public static string GetConnectionString(string connectionStringName)
@@ -80,7 +76,7 @@ public partial class YUniContext : DbContext
     {
         modelBuilder.Entity<Assignment>(entity =>
         {
-            entity.HasKey(e => e.AssignmentId).HasName("PK__Assignme__52C2182074F893CC");
+            entity.HasKey(e => e.AssignmentId).HasName("PK__Assignme__52C21820EA5789B3");
 
             entity.Property(e => e.AssignmentId)
                 .ValueGeneratedNever()
@@ -113,51 +109,20 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.Priority).WithMany(p => p.Assignments)
                 .HasForeignKey(d => d.PriorityId)
-                .HasConstraintName("FK__Assignmen__prior__7D439ABD");
+                .HasConstraintName("FK__Assignmen__prior__787EE5A0");
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Assignments)
                 .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__Assignmen__subje__7E37BEF6");
+                .HasConstraintName("FK__Assignmen__subje__797309D9");
 
             entity.HasOne(d => d.User).WithMany(p => p.Assignments)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Assignments_Users");
         });
 
-        modelBuilder.Entity<AuditLog>(entity =>
-        {
-            entity.HasKey(e => e.LogId).HasName("PK__AuditLog__7839F64D4008CBA1");
-
-            entity.Property(e => e.LogId)
-                .ValueGeneratedNever()
-                .HasColumnName("logId");
-            entity.Property(e => e.ActionTimestamp)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("actionTimestamp");
-            entity.Property(e => e.ActionType)
-                .IsRequired()
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("actionType");
-            entity.Property(e => e.NewValues).HasColumnName("newValues");
-            entity.Property(e => e.OldValues).HasColumnName("oldValues");
-            entity.Property(e => e.RecordId).HasColumnName("recordId");
-            entity.Property(e => e.TableName)
-                .IsRequired()
-                .HasMaxLength(255)
-                .IsUnicode(false)
-                .HasColumnName("tableName");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.AuditLogs)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__AuditLogs__userI__46E78A0C");
-        });
-
         modelBuilder.Entity<Budget>(entity =>
         {
-            entity.HasKey(e => e.BudgetId).HasName("PK__Budgets__1E2B71361B3750EA");
+            entity.HasKey(e => e.BudgetId).HasName("PK__Budgets__1E2B7136CBA81C32");
 
             entity.Property(e => e.BudgetId)
                 .ValueGeneratedNever()
@@ -173,21 +138,21 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.Account).WithMany(p => p.Budgets)
                 .HasForeignKey(d => d.AccountId)
-                .HasConstraintName("FK__Budgets__account__245D67DE");
+                .HasConstraintName("FK__Budgets__account__19DFD96B");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Budgets)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK__Budgets__categor__236943A5");
+                .HasConstraintName("FK__Budgets__categor__18EBB532");
 
             entity.HasOne(d => d.User).WithMany(p => p.Budgets)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Budgets__userId__25518C17");
+                .HasConstraintName("FK__Budgets__userId__1AD3FDA4");
         });
 
         modelBuilder.Entity<Discount>(entity =>
         {
-            entity.HasKey(e => e.DiscountId).HasName("PK__Discount__D2130A66931E5E85");
+            entity.HasKey(e => e.DiscountId).HasName("PK__Discount__D2130A668129EFCC");
 
             entity.Property(e => e.DiscountId)
                 .ValueGeneratedNever()
@@ -207,7 +172,7 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<Event>(entity =>
         {
-            entity.HasKey(e => e.EventId).HasName("PK__Events__2DC7BD09D69BEBCB");
+            entity.HasKey(e => e.EventId).HasName("PK__Events__2DC7BD09ED30FAE9");
 
             entity.Property(e => e.EventId)
                 .ValueGeneratedNever()
@@ -237,18 +202,18 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.EvCategory).WithMany(p => p.Events)
                 .HasForeignKey(d => d.EvCategoryId)
-                .HasConstraintName("FK__Events__evCatego__06CD04F7");
+                .HasConstraintName("FK__Events__evCatego__02084FDA");
 
             entity.HasOne(d => d.User).WithMany(p => p.Events)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Events__userId__07C12930");
+                .HasConstraintName("FK__Events__userId__02FC7413");
         });
 
         modelBuilder.Entity<EventCategory>(entity =>
         {
-            entity.HasKey(e => e.EvCategoryId).HasName("PK__EventCat__9914124AFCAA1E18");
+            entity.HasKey(e => e.EvCategoryId).HasName("PK__EventCat__9914124AF400B5A9");
 
-            entity.HasIndex(e => e.CategoryName, "UQ__EventCat__37077ABDFD2EA8C8").IsUnique();
+            entity.HasIndex(e => e.CategoryName, "UQ__EventCat__37077ABD900AFF49").IsUnique();
 
             entity.Property(e => e.EvCategoryId)
                 .ValueGeneratedNever()
@@ -265,7 +230,7 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<Expense>(entity =>
         {
-            entity.HasKey(e => e.ExpensesId).HasName("PK__Expenses__B3C129D5DB7992E3");
+            entity.HasKey(e => e.ExpensesId).HasName("PK__Expenses__B3C129D55E19421C");
 
             entity.Property(e => e.ExpensesId)
                 .ValueGeneratedNever()
@@ -297,22 +262,22 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.Account).WithMany(p => p.Expenses)
                 .HasForeignKey(d => d.AccountId)
-                .HasConstraintName("FK__Expenses__accoun__5BE2A6F2");
+                .HasConstraintName("FK__Expenses__accoun__571DF1D5");
 
             entity.HasOne(d => d.ExC).WithMany(p => p.Expenses)
                 .HasForeignKey(d => d.ExCid)
-                .HasConstraintName("FK__Expenses__exCId__5AEE82B9");
+                .HasConstraintName("FK__Expenses__exCId__5629CD9C");
 
             entity.HasOne(d => d.User).WithMany(p => p.Expenses)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Expenses__userId__5CD6CB2B");
+                .HasConstraintName("FK__Expenses__userId__5812160E");
         });
 
         modelBuilder.Entity<ExpensesCategory>(entity =>
         {
-            entity.HasKey(e => e.ExCid).HasName("PK__Expenses__EC0350FED2E78D81");
+            entity.HasKey(e => e.ExCid).HasName("PK__Expenses__EC0350FE5ED34015");
 
-            entity.HasIndex(e => e.CategoryName, "UQ__Expenses__37077ABD9876CC02").IsUnique();
+            entity.HasIndex(e => e.CategoryName, "UQ__Expenses__37077ABD87626041").IsUnique();
 
             entity.Property(e => e.ExCid)
                 .ValueGeneratedNever()
@@ -329,7 +294,7 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<FinancialAccount>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Financia__F267251E9F7D2B0C");
+            entity.HasKey(e => e.AccountId).HasName("PK__Financia__F267251E1FE90D3C");
 
             entity.Property(e => e.AccountId)
                 .ValueGeneratedNever()
@@ -356,12 +321,12 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.FinancialAccounts)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Financial__userI__5070F446");
+                .HasConstraintName("FK__Financial__userI__4BAC3F29");
         });
 
         modelBuilder.Entity<Goal>(entity =>
         {
-            entity.HasKey(e => e.GoalId).HasName("PK__Goals__7E225EB1AEB700B6");
+            entity.HasKey(e => e.GoalId).HasName("PK__Goals__7E225EB191B91E4E");
 
             entity.Property(e => e.GoalId)
                 .ValueGeneratedNever()
@@ -385,12 +350,12 @@ public partial class YUniContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Goals)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Goals__userId__1EA48E88");
+                .HasConstraintName("FK__Goals__userId__14270015");
         });
 
         modelBuilder.Entity<Investment>(entity =>
         {
-            entity.HasKey(e => e.InvestmentId).HasName("PK__Investme__AF6E7CD9B2A085BB");
+            entity.HasKey(e => e.InvestmentId).HasName("PK__Investme__AF6E7CD9F647B99A");
 
             entity.Property(e => e.InvestmentId)
                 .ValueGeneratedNever()
@@ -413,12 +378,12 @@ public partial class YUniContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Investments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Investmen__userI__29221CFB");
+                .HasConstraintName("FK__Investmen__userI__1EA48E88");
         });
 
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.InvoiceId).HasName("PK__Invoices__1252416CFF145E83");
+            entity.HasKey(e => e.InvoiceId).HasName("PK__Invoices__1252416C4E03E652");
 
             entity.Property(e => e.InvoiceId)
                 .ValueGeneratedNever()
@@ -462,24 +427,24 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.Discount).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.DiscountId)
-                .HasConstraintName("FK__Invoices__discou__70DDC3D8");
+                .HasConstraintName("FK__Invoices__discou__6C190EBB");
 
             entity.HasOne(d => d.MembershipPlan).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.MembershipPlanId)
-                .HasConstraintName("FK__Invoices__member__71D1E811");
+                .HasConstraintName("FK__Invoices__member__6D0D32F4");
 
             entity.HasOne(d => d.PaymentMethod).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.PaymentMethodId)
-                .HasConstraintName("FK__Invoices__paymen__6EF57B66");
+                .HasConstraintName("FK__Invoices__paymen__6A30C649");
 
             entity.HasOne(d => d.User).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Invoices__userId__6FE99F9F");
+                .HasConstraintName("FK__Invoices__userId__6B24EA82");
         });
 
         modelBuilder.Entity<MembershipPlan>(entity =>
         {
-            entity.HasKey(e => e.MPid).HasName("PK__Membersh__6EE0AD3B31E5F382");
+            entity.HasKey(e => e.MPid).HasName("PK__Membersh__6EE0AD3B5AFA1A14");
 
             entity.Property(e => e.MPid)
                 .ValueGeneratedNever()
@@ -497,9 +462,9 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<PaymentGateway>(entity =>
         {
-            entity.HasKey(e => e.GatewayId).HasName("PK__PaymentG__B59884D6A78F7F63");
+            entity.HasKey(e => e.GatewayId).HasName("PK__PaymentG__B59884D693F06D59");
 
-            entity.HasIndex(e => e.GatewayName, "UQ__PaymentG__9025BBE5052C76D1").IsUnique();
+            entity.HasIndex(e => e.GatewayName, "UQ__PaymentG__9025BBE5B6CB97C8").IsUnique();
 
             entity.Property(e => e.GatewayId)
                 .ValueGeneratedNever()
@@ -520,9 +485,9 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.MethodId).HasName("PK__PaymentM__C7B34C89D98C3DD2");
+            entity.HasKey(e => e.MethodId).HasName("PK__PaymentM__C7B34C89CE8A896F");
 
-            entity.HasIndex(e => e.MethodName, "UQ__PaymentM__DF66BADD2A8C564D").IsUnique();
+            entity.HasIndex(e => e.MethodName, "UQ__PaymentM__DF66BADDE1AA8529").IsUnique();
 
             entity.Property(e => e.MethodId)
                 .ValueGeneratedNever()
@@ -539,9 +504,9 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<PriorityLevel>(entity =>
         {
-            entity.HasKey(e => e.PriorityId).HasName("PK__Priority__58E3F01A53CABC17");
+            entity.HasKey(e => e.PriorityId).HasName("PK__Priority__58E3F01A805F3832");
 
-            entity.HasIndex(e => e.LevelName, "UQ__Priority__06C47A52AE964045").IsUnique();
+            entity.HasIndex(e => e.LevelName, "UQ__Priority__06C47A52D82D832C").IsUnique();
 
             entity.Property(e => e.PriorityId).HasColumnName("priorityId");
             entity.Property(e => e.ColorCode)
@@ -557,7 +522,7 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<Reminder>(entity =>
         {
-            entity.HasKey(e => e.ReminderId).HasName("PK__Reminder__09DAAAE3AF26B593");
+            entity.HasKey(e => e.ReminderId).HasName("PK__Reminder__09DAAAE31216B1D9");
 
             entity.Property(e => e.ReminderId)
                 .ValueGeneratedNever()
@@ -582,24 +547,24 @@ public partial class YUniContext : DbContext
 
             entity.HasOne(d => d.Assignment).WithMany(p => p.Reminders)
                 .HasForeignKey(d => d.AssignmentId)
-                .HasConstraintName("FK__Reminders__assig__123EB7A3");
+                .HasConstraintName("FK__Reminders__assig__0D7A0286");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Reminders)
                 .HasForeignKey(d => d.EventId)
-                .HasConstraintName("FK__Reminders__event__114A936A");
+                .HasConstraintName("FK__Reminders__event__0C85DE4D");
 
             entity.HasOne(d => d.Template).WithMany(p => p.Reminders)
                 .HasForeignKey(d => d.TemplateId)
-                .HasConstraintName("FK__Reminders__templ__14270015");
+                .HasConstraintName("FK__Reminders__templ__0F624AF8");
 
             entity.HasOne(d => d.User).WithMany(p => p.Reminders)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Reminders__userI__1332DBDC");
+                .HasConstraintName("FK__Reminders__userI__0E6E26BF");
         });
 
         modelBuilder.Entity<ReminderTemplate>(entity =>
         {
-            entity.HasKey(e => e.TemplateId).HasName("PK__Reminder__530F38004AA5BCCC");
+            entity.HasKey(e => e.TemplateId).HasName("PK__Reminder__530F380032A9FEB9");
 
             entity.Property(e => e.TemplateId)
                 .ValueGeneratedNever()
@@ -618,11 +583,11 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98462A12A3CEE5");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__CD98462A051CCB28");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__B19478611DCB30EC").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Role__B194786109928A7D").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("roleId");
             entity.Property(e => e.CreatedAt)
@@ -645,9 +610,9 @@ public partial class YUniContext : DbContext
 
         modelBuilder.Entity<Subject>(entity =>
         {
-            entity.HasKey(e => e.SubjectId).HasName("PK__Subjects__ACF9A7608C5F15A7");
+            entity.HasKey(e => e.SubjectId).HasName("PK__Subjects__ACF9A7607061A3F6");
 
-            entity.HasIndex(e => e.SubjectName, "UQ__Subjects__E5068BFDA1A55059").IsUnique();
+            entity.HasIndex(e => e.SubjectName, "UQ__Subjects__E5068BFD632F7C44").IsUnique();
 
             entity.Property(e => e.SubjectId)
                 .ValueGeneratedNever()
@@ -662,47 +627,13 @@ public partial class YUniContext : DbContext
                 .HasColumnName("subjectName");
         });
 
-        modelBuilder.Entity<TimeLog>(entity =>
-        {
-            entity.HasKey(e => e.LogId).HasName("PK__TimeLogs__7839F64DCE8403D0");
-
-            entity.Property(e => e.LogId)
-                .ValueGeneratedNever()
-                .HasColumnName("logId");
-            entity.Property(e => e.AssignmentId).HasColumnName("assignmentId");
-            entity.Property(e => e.Duration)
-                .HasComputedColumnSql("(datediff(minute,[startTime],[endTime]))", false)
-                .HasColumnName("duration");
-            entity.Property(e => e.EndTime)
-                .HasColumnType("datetime")
-                .HasColumnName("endTime");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.StartTime)
-                .HasColumnType("datetime")
-                .HasColumnName("startTime");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.Assignment).WithMany(p => p.TimeLogs)
-                .HasForeignKey(d => d.AssignmentId)
-                .HasConstraintName("FK__TimeLogs__assign__17F790F9");
-
-            entity.HasOne(d => d.Event).WithMany(p => p.TimeLogs)
-                .HasForeignKey(d => d.EventId)
-                .HasConstraintName("FK__TimeLogs__eventI__18EBB532");
-
-            entity.HasOne(d => d.User).WithMany(p => p.TimeLogs)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__TimeLogs__userId__19DFD96B");
-        });
-
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__CB9A1CFF2049402D");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__CB9A1CFFC7ED3310");
 
-            entity.HasIndex(e => e.UserName, "UQ__Users__66DCF95CE2C6DF19").IsUnique();
+            entity.HasIndex(e => e.UserName, "UQ__Users__66DCF95CD1CCD129").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__Users__AB6E6164D49D32DF").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Users__AB6E616472C4DC4B").IsUnique();
 
             entity.Property(e => e.UserId)
                 .ValueGeneratedNever()
