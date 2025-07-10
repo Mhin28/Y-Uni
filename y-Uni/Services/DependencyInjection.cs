@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Services.Services.AccountService;
 using Services.Services.AssignmentService;
-using Services.Services.AuditLogService;
 using Services.Services.AuthenticateService;
 using Services.Services.DiscountService;
 using Services.Services.EmailService;
@@ -11,6 +10,7 @@ using Services.Services.EventService;
 using Services.Services.ExpensesCategoryService;
 using Services.Services.ExpenseService;
 using Services.Services.FinancialAccountService;
+using Services.Services.GoalService;
 using Services.Services.InvoiceService;
 using Services.Services.MembershipPlanService;
 using Services.Services.PaymentGatewayService;
@@ -39,7 +39,6 @@ namespace Services
             services.AddScoped<IExpensesCategoryService, ExpensesCategoryService>();
 			services.AddScoped<IPaymentMethodService, PaymentMethodService>();
             services.AddScoped<IFinancialAccountService, FinancialAccountService>();
-            services.AddScoped<IAuditLogsService, AuditLogsService>();
             services.AddScoped<IAssignmentService, AssignmentService>();
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IPriorityLevelService, PriorityLevelService>();
@@ -52,6 +51,7 @@ namespace Services
             services.AddScoped<IReminderTemplateService, ReminderTemplateService>();
             services.AddScoped<IReminderService, ReminderService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IGoalService, GoalService>();
 
             return services;
         }

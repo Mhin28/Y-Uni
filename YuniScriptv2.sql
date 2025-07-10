@@ -40,20 +40,6 @@ CREATE TABLE Users (
 GO
 
 
--- 4. Tạo bảng AuditLogs
-CREATE TABLE AuditLogs (
-    logId UNIQUEIDENTIFIER PRIMARY KEY,
-    actionType VARCHAR(10) NOT NULL CHECK (actionType IN ('INSERT', 'UPDATE', 'DELETE')),
-    tableName VARCHAR(255) NOT NULL,
-    recordId UNIQUEIDENTIFIER NOT NULL,
-    userId UNIQUEIDENTIFIER,
-    actionTimestamp DATETIME DEFAULT GETDATE(),
-    oldValues NVARCHAR(MAX),
-    newValues NVARCHAR(MAX),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
-);
-GO
-
 -- 5. Tạo bảng PaymentMethods
 CREATE TABLE PaymentMethods (
     methodId UNIQUEIDENTIFIER PRIMARY KEY,
@@ -236,22 +222,6 @@ CREATE TABLE Reminders (
     FOREIGN KEY (assignmentId) REFERENCES Assignments(assignmentId),
     FOREIGN KEY (userId) REFERENCES Users(userId),
     FOREIGN KEY (templateId) REFERENCES ReminderTemplates(templateId)
-);
-GO
-
--- 20. Tạo bảng TimeLogs
-CREATE TABLE TimeLogs (
-    logId UNIQUEIDENTIFIER PRIMARY KEY,
-    assignmentId UNIQUEIDENTIFIER,
-    eventId UNIQUEIDENTIFIER,
-    startTime DATETIME NOT NULL,
-    endTime DATETIME NOT NULL,
-    duration AS (DATEDIFF(MINUTE, startTime, endTime)),
-    userId UNIQUEIDENTIFIER NOT NULL,
-    CHECK (endTime > startTime),
-    FOREIGN KEY (assignmentId) REFERENCES Assignments(assignmentId),
-    FOREIGN KEY (eventId) REFERENCES Events(eventId),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
 );
 GO
 

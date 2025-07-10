@@ -306,7 +306,6 @@ namespace Services.Services.UserService
 
             try
             {
-                // Lấy user theo email
                 var user = await _userRepo.GetByEmailAsync(email);
                 if (user == null)
                 {

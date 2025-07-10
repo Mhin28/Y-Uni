@@ -29,7 +29,5 @@ public partial class Event
 
     public virtual ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
 
-    public virtual ICollection<TimeLog> TimeLogs { get; set; } = new List<TimeLog>();
-
     public virtual User User { get; set; }
 }
