@@ -29,7 +29,7 @@ namespace Services.Services.InvestmentService
             decimal? maxAmount = null,
             DateOnly? maturityFrom = null,
             DateOnly? maturityTo = null,
-            double? interestRate = null)
+            decimal? interestRate = null)
         {
             var decoded = _tokenService.decode(token);
             if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")

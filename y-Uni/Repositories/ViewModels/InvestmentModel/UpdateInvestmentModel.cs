@@ -7,7 +7,7 @@ namespace Repositories.ViewModels.InvestmentModel
         public string InvestmentName { get; set; }
         public decimal Amount { get; set; }
         public DateOnly InvestmentDate { get; set; }
-        public DateOnly MaturityDate { get; set; }
-        public double InterestRate { get; set; }
+        public DateOnly? MaturityDate { get; set; }
+        public decimal? InterestRate { get; set; }
     }
 } 
