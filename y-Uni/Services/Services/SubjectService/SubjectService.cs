@@ -114,6 +114,7 @@ namespace Services.Services.SubjectService
                     SubjectName = subject.SubjectName,
                     Description = subject.Description
                 };
+                result.Message = "Subject created successfully";
             }
             catch (Exception ex)
             {
@@ -155,6 +156,7 @@ namespace Services.Services.SubjectService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Subject updated successfully";
                 result.Data = model;
             }
             catch (Exception ex)

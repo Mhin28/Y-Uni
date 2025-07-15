@@ -108,6 +108,7 @@ namespace Services.Services.EventCategoryService
                 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
+                result.Message = "Event category created successfully";
                 result.Data = new EventCategoryModel
                 {
                     EvCategoryId = eventCategory.EvCategoryId,
@@ -155,6 +156,7 @@ namespace Services.Services.EventCategoryService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Event category updated successfully";
                 result.Data = model;
             }
             catch (Exception ex)

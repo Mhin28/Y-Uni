@@ -15,7 +15,12 @@ builder.Services.AddDbContext<YUniContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 
 // Register the byte constraint
 builder.Services.Configure<RouteOptions>(options =>
@@ -37,6 +42,9 @@ builder.Services.AddCors(options =>
 builder.Services
     .AddService(builder.Configuration)
     .AddRepository(builder.Configuration);
+
+// Add Background Service for processing reminders
+builder.Services.AddHostedService<API.Services.ReminderBackgroundService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer("Bearer", options =>
     {

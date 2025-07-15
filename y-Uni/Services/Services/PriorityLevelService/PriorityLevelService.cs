@@ -122,6 +122,7 @@ namespace Services.Services.PriorityLevelService
                 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
+                result.Message = "Priority level created successfully";
                 result.Data = new PriorityLevelModel
                 {
                     PriorityId = priorityLevel.PriorityId,
@@ -175,6 +176,7 @@ namespace Services.Services.PriorityLevelService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Priority level updated successfully";
                 result.Data = model;
             }
             catch (Exception ex)

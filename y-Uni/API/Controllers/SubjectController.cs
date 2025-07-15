@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.SubjectModel;
 using Services.Services.SubjectService;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class SubjectController : ControllerBase
 	{
 		private readonly ISubjectService _subjectService;

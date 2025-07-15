@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.EventCategoryModel;
 using Services.Services.EventCategoryService;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class EventCategoryController : ControllerBase
 	{
 		private readonly IEventCategoryService _eventCategoryService;

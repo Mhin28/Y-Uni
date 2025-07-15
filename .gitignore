@@ -83,3 +83,6 @@ service_pattern.txt
 # Firebase service account key
 Keys/
 *.json
+*.sql
+*.txt
+*.md

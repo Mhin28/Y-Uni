@@ -43,7 +43,7 @@ namespace Services.Services.AssignmentService
             var result = new ResultModel();
             try
             {
-                var assignment = await _repo.GetByIdAsync(id);
+                var assignment = await _repo.GetByIdWithIncludesAsync(id);
                 if (assignment == null)
                 {
                     result.IsSuccess = false;
@@ -167,9 +167,13 @@ namespace Services.Services.AssignmentService
                 
                 await _repo.CreateAsync(assignment);
                 
+                // Reload the assignment with navigation properties included
+                var createdAssignment = await _repo.GetByIdWithIncludesAsync(assignment.AssignmentId);
+                
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
-                result.Data = assignment;
+                result.Message = "Assignment created successfully";
+                result.Data = createdAssignment ?? assignment;
             }
             catch (Exception ex)
             {
@@ -208,6 +212,7 @@ namespace Services.Services.AssignmentService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Assignment updated successfully";
                 result.Data = assignment;
             }
             catch (Exception ex)
@@ -229,6 +234,14 @@ namespace Services.Services.AssignmentService
 
             try
             {
+                // Validate status value
+                var validStatuses = new[] { "not_started", "in_progress", "completed" };
+                if (!validStatuses.Contains(status?.ToLower()))
+                {
+                    result.Message = $"Invalid status. Valid values are: {string.Join(", ", validStatuses)}";
+                    return result;
+                }
+
                 var assignment = await _repo.GetByIdAsync(id);
                 if (assignment == null)
                 {
@@ -236,7 +249,7 @@ namespace Services.Services.AssignmentService
                     return result;
                 }
 
-                assignment.Status = status;
+                assignment.Status = status.ToLower();
                 
                 if (status == "completed" && assignment.CompletedDate == null)
                 {
@@ -251,6 +264,7 @@ namespace Services.Services.AssignmentService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Assignment status updated successfully";
                 result.Data = assignment;
             }
             catch (Exception ex)
@@ -286,6 +300,7 @@ namespace Services.Services.AssignmentService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Assignment completed successfully";
                 result.Data = assignment;
             }
             catch (Exception ex)

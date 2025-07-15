@@ -155,6 +155,7 @@ namespace Services.Services.EventService
                 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
+                result.Message = "Event created successfully";
                 result.Data = eventEntity;
             }
             catch (Exception ex)
@@ -202,6 +203,7 @@ namespace Services.Services.EventService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Event updated successfully";
                 result.Data = eventEntity;
             }
             catch (Exception ex)

@@ -73,17 +73,39 @@ namespace Services.Services.ReminderTemplateService
 			};
 			try
 			{
+				// Validate required fields
+				if (string.IsNullOrWhiteSpace(model.TemplateName))
+				{
+					result.Message = "Template name is required";
+					return result;
+				}
+
+				if (string.IsNullOrWhiteSpace(model.TriggerType))
+				{
+					result.Message = "Trigger type is required";
+					return result;
+				}
+
+				// Validate trigger type values
+				var validTriggerTypes = new[] { "before_start", "after_completion", "fixed_time" };
+				if (!validTriggerTypes.Contains(model.TriggerType.ToLower()))
+				{
+					result.Message = $"Invalid trigger type. Valid values are: {string.Join(", ", validTriggerTypes)}";
+					return result;
+				}
+
 				var template = new ReminderTemplate
 				{
 					TemplateId = Guid.NewGuid(),
-					TemplateName = model.TemplateName,
-					TriggerType = model.TriggerType,
+					TemplateName = model.TemplateName.Trim(),
+					TriggerType = model.TriggerType.ToLower(),
 					TriggerValue = model.TriggerValue
 				};
 				await _repo.CreateAsync(template);
 
 				result.IsSuccess = true;
 				result.Code = (int)System.Net.HttpStatusCode.Created;
+				result.Message = "Reminder template created successfully";
 				result.Data = template;
 			}
 			catch (Exception ex)

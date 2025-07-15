@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.PriorityLevelModel;
 using Services.Services.PriorityLevelService;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class PriorityLevelController : ControllerBase
 	{
 		private readonly IPriorityLevelService _priorityLevelService;
