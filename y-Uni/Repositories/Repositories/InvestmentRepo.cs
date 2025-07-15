@@ -23,7 +23,7 @@ namespace Repositories.Repositories
             decimal? maxAmount = null,
             DateOnly? maturityFrom = null,
             DateOnly? maturityTo = null,
-            double? interestRate = null)
+            decimal? interestRate = null)
         {
             var query = _context.Investments.Where(i => i.UserId == userId);
             if (!string.IsNullOrEmpty(investmentName))

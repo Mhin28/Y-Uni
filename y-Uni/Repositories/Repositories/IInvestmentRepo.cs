@@ -16,7 +16,7 @@ namespace Repositories.Repositories
             decimal? maxAmount = null,
             DateOnly? maturityFrom = null,
             DateOnly? maturityTo = null,
-            double? interestRate = null);
+            decimal? interestRate = null);
         Task<Investment> GetInvestmentByIdAsync(Guid investmentId);
         Task<Investment> AddInvestmentAsync(Investment investment);
         Task<bool> UpdateInvestmentAsync(Investment investment);

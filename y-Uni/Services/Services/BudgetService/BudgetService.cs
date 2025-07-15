@@ -30,8 +30,8 @@ namespace Services.Services.BudgetService
             var data = budgets.Select(b => new BudgetModel
             {
                 BudgetId = b.BudgetId,
-                CategoryId = b.CategoryId,
-                AccountId = b.AccountId,
+                CategoryId = (Guid)b.CategoryId,
+                AccountId = (Guid)b.AccountId,
                 BudgetAmount = b.BudgetAmount,
                 StartDate = b.StartDate,
                 EndDate = b.EndDate,
@@ -60,8 +60,8 @@ namespace Services.Services.BudgetService
                 return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.InternalServerError, Message = "Tạo ngân sách thất bại" };
             return new ResultModel { IsSuccess = true, Code = (int)HttpStatusCode.Created, Message = "Tạo ngân sách thành công", Data = new BudgetModel {
                 BudgetId = created.BudgetId,
-                CategoryId = created.CategoryId,
-                AccountId = created.AccountId,
+                CategoryId = (Guid)created.CategoryId,
+                AccountId = (Guid)created.AccountId,
                 BudgetAmount = created.BudgetAmount,
                 StartDate = created.StartDate,
                 EndDate = created.EndDate,

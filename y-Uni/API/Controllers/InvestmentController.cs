@@ -27,7 +27,7 @@ namespace API.Controllers
             [FromQuery] decimal? maxAmount,
             [FromQuery] DateOnly? maturityFrom,
             [FromQuery] DateOnly? maturityTo,
-            [FromQuery] double? interestRate)
+            [FromQuery] decimal? interestRate)
         {
             string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var result = await _investmentService.GetInvestmentsByUserAsync(token, investmentName, from, to, minAmount, maxAmount, maturityFrom, maturityTo, interestRate);
