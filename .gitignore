@@ -80,3 +80,6 @@ remainingtask.txt
 taskdone.txt
 repository_pattern.txt
 service_pattern.txt
+# Firebase service account key
+Keys/
+*.json

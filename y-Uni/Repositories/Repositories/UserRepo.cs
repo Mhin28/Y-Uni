@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repositories.Base;
 using Repositories.Models;
+using Repositories.ViewModels.UserModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace Repositories.Repositories
         }
         public async Task<User> GetByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<User> AddAsync(User user)
@@ -37,31 +38,42 @@ namespace Repositories.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
-        
+
         public async Task<User> UpdateAsync(User user)
         {
             var existingUser = await _context.Users.FindAsync(user.UserId);
             if (existingUser == null)
                 return null;
-                
-            // Update only the fields that should be updatable
-            existingUser.FullName = user.FullName;
-            existingUser.Email = user.Email;
-            existingUser.DoB = user.DoB;
+
             existingUser.UpdatedAt = DateTime.UtcNow;
-            
-            // Don't update sensitive fields like password here
-            // Don't update username as it's typically used as an identifier
-            
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
+            _context.Entry(existingUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return existingUser;
         }
-        
+
         public async Task<User?> GetByIdAsync(Guid userId)
         {
             return await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+        public async Task<bool> CheckRoleExists(int roleId)
+        {
+            return await _context.Roles.AnyAsync(r => r.RoleId == roleId);
+        }
+        public async Task<User> UpdateVerifyAsync(User model)
+        {
+            var existingUser = await _context.Users.FindAsync(model.UserId);
+            if (existingUser == null)
+                return null;
+
+            existingUser.VerificationCode = model.VerificationCode;
+            existingUser.VerificationCodeExpiry = model.VerificationCodeExpiry;
+            existingUser.IsVerified = model.IsVerified;
+            _context.Entry(existingUser).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return existingUser;
         }
     }
 }

@@ -60,8 +60,10 @@ namespace Services.Services.AccountService
                     UserName = existedUser.UserName,
                     Email = existedUser.Email,
                     DoB = existedUser.DoB,
+                    RoleId = existedUser.RoleId,
                     PasswordHash = existedUser.PasswordHash,
                     LastLogin = existedUser.LastLogin,
+                    Img = existedUser.Img,
                     IsVerified = existedUser.IsVerified,
                     CreatedAt = existedUser.CreatedAt,
                     UpdatedAt = existedUser.UpdatedAt

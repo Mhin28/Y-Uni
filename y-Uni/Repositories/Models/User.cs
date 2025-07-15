@@ -21,15 +21,21 @@ public partial class User
 
     public DateTime? LastLogin { get; set; }
 
+    public string Img { get; set; }
+
     public bool? IsVerified { get; set; }
+
+    public int? RoleId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+    public string VerificationCode { get; set; }
 
-    public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+    public DateTime? VerificationCodeExpiry { get; set; }
+
+    public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
@@ -47,7 +53,5 @@ public partial class User
 
     public virtual ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
 
-    public virtual ICollection<TimeLog> TimeLogs { get; set; } = new List<TimeLog>();
-
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual Role Role { get; set; }
 }
