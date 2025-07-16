@@ -7,5 +7,7 @@ namespace Repositories.ViewModels.EventCategoryModel
         public string CategoryName { get; set; }
         
         public string Description { get; set; }
+
+        public Guid UserId { get; set; }
     }
 } 

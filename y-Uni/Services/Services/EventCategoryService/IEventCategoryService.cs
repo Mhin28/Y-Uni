@@ -9,6 +9,7 @@ namespace Services.Services.EventCategoryService
     {
         Task<ResultModel> GetAllAsync();
         Task<ResultModel> GetByIdAsync(Guid id);
+        Task<ResultModel> GetByUserIdAsync(Guid userId);
         Task<ResultModel> AddAsync(PostEventCategoryModel model);
         Task<ResultModel> UpdateAsync(EventCategoryModel model);
         Task<ResultModel> DeleteAsync(Guid id);

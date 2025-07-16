@@ -30,5 +30,13 @@ namespace Repositories.Repositories
             return await _context.Events
                 .AnyAsync(e => e.EvCategoryId == categoryId);
         }
+
+        public async Task<List<EventCategory>> GetCategoriesByUserIdAsync(Guid userId)
+        {
+            return await _context.EventCategories
+                .Where(c => c.UserId == userId)
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+        }
     }
-} 
+}

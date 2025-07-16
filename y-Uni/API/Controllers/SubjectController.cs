@@ -37,6 +37,14 @@ namespace API.Controllers
 			return StatusCode(result.Code, result);
 		}
 
+		// GET: api/Subject/user/{userId}
+		[HttpGet("user/{userId:guid}")]
+		public async Task<IActionResult> GetByUserId(Guid userId)
+		{
+			var result = await _subjectService.GetByUserIdAsync(userId);
+			return StatusCode(result.Code, result);
+		}
+
 		// POST: api/Subject
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] PostSubjectModel model)

@@ -10,6 +10,7 @@ namespace Repositories.Repositories
     {
         Task<Subject> GetByIdAsync(Guid subjectId);
         Task<List<Subject>> GetAllOrderedByNameAsync();
+        Task<List<Subject>> GetSubjectsByUserIdAsync(Guid userId);
         Task<bool> IsSubjectInUseAsync(Guid subjectId);
     }
 } 

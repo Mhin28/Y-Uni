@@ -24,14 +24,15 @@ namespace Services.Services.SubjectService
             try
             {
                 var subjects = await _repo.GetAllOrderedByNameAsync();
-                
+
                 var subjectModels = subjects.Select(s => new SubjectModel
                 {
                     SubjectId = s.SubjectId,
                     SubjectName = s.SubjectName,
-                    Description = s.Description
+                    Description = s.Description,
+                    UserId = s.UserId
                 }).ToList();
-                
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
                 result.Data = subjectModels;
@@ -63,7 +64,8 @@ namespace Services.Services.SubjectService
                 {
                     SubjectId = subject.SubjectId,
                     SubjectName = subject.SubjectName,
-                    Description = subject.Description
+                    Description = subject.Description,
+                    UserId = subject.UserId
                 };
 
                 result.IsSuccess = true;
@@ -97,22 +99,30 @@ namespace Services.Services.SubjectService
                     return result;
                 }
 
+                if (model.UserId == Guid.Empty)
+                {
+                    result.Message = "User ID is required";
+                    return result;
+                }
+
                 var subject = new Subject
                 {
                     SubjectId = Guid.NewGuid(),
                     SubjectName = model.SubjectName,
-                    Description = model.Description
+                    Description = model.Description,
+                    UserId = model.UserId
                 };
-                
+
                 await _repo.CreateAsync(subject);
-                
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
                 result.Data = new SubjectModel
                 {
                     SubjectId = subject.SubjectId,
                     SubjectName = subject.SubjectName,
-                    Description = subject.Description
+                    Description = subject.Description,
+                    UserId = subject.UserId
                 };
                 result.Message = "Subject created successfully";
             }
@@ -121,6 +131,34 @@ namespace Services.Services.SubjectService
                 result.Message = ex.Message;
             }
 
+            return result;
+        }
+
+        public async Task<ResultModel> GetByUserIdAsync(Guid userId)
+        {
+            var result = new ResultModel();
+            try
+            {
+                var subjects = await _repo.GetSubjectsByUserIdAsync(userId);
+
+                var subjectModels = subjects.Select(s => new SubjectModel
+                {
+                    SubjectId = s.SubjectId,
+                    SubjectName = s.SubjectName,
+                    Description = s.Description,
+                    UserId = s.UserId
+                }).ToList();
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Data = subjectModels;
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = ex.Message;
+            }
             return result;
         }
 
@@ -207,4 +245,4 @@ namespace Services.Services.SubjectService
             return result;
         }
     }
-} 
+}

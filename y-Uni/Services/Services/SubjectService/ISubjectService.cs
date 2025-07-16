@@ -9,6 +9,7 @@ namespace Services.Services.SubjectService
     {
         Task<ResultModel> GetAllAsync();
         Task<ResultModel> GetByIdAsync(Guid id);
+        Task<ResultModel> GetByUserIdAsync(Guid userId);
         Task<ResultModel> AddAsync(PostSubjectModel model);
         Task<ResultModel> UpdateAsync(SubjectModel model);
         Task<ResultModel> DeleteAsync(Guid id);

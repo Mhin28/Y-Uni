@@ -1,14 +1,6 @@
-﻿USE master;
-GO
+﻿
 
--- Tạo cơ sở dữ liệu YUni
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'YUni')
-BEGIN
-    CREATE DATABASE YUni;
-END
-GO
-
-USE YUni;
+USE YuniBuddy;
 GO
 
 -- 1. Tạo bảng Role trước

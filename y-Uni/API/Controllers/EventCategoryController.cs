@@ -37,6 +37,14 @@ namespace API.Controllers
 			return StatusCode(result.Code, result);
 		}
 
+		// GET: api/EventCategory/user/{userId}
+		[HttpGet("user/{userId:guid}")]
+		public async Task<IActionResult> GetByUserId(Guid userId)
+		{
+			var result = await _eventCategoryService.GetByUserIdAsync(userId);
+			return StatusCode(result.Code, result);
+		}
+
 		// POST: api/EventCategory
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] PostEventCategoryModel model)

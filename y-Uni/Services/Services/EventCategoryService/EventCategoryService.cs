@@ -24,14 +24,15 @@ namespace Services.Services.EventCategoryService
             try
             {
                 var categories = await _repo.GetAllOrderedByNameAsync();
-                
+
                 var categoryModels = categories.Select(c => new EventCategoryModel
                 {
                     EvCategoryId = c.EvCategoryId,
                     CategoryName = c.CategoryName,
-                    Description = c.Description
+                    Description = c.Description,
+                    UserId = c.UserId
                 }).ToList();
-                
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
                 result.Data = categoryModels;
@@ -63,7 +64,8 @@ namespace Services.Services.EventCategoryService
                 {
                     EvCategoryId = category.EvCategoryId,
                     CategoryName = category.CategoryName,
-                    Description = category.Description
+                    Description = category.Description,
+                    UserId = category.UserId
                 };
 
                 result.IsSuccess = true;
@@ -97,15 +99,22 @@ namespace Services.Services.EventCategoryService
                     return result;
                 }
 
+                if (model.UserId == Guid.Empty)
+                {
+                    result.Message = "User ID is required";
+                    return result;
+                }
+
                 var eventCategory = new EventCategory
                 {
                     EvCategoryId = Guid.NewGuid(),
                     CategoryName = model.CategoryName,
-                    Description = model.Description
+                    Description = model.Description,
+                    UserId = model.UserId
                 };
-                
+
                 await _repo.CreateAsync(eventCategory);
-                
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
                 result.Message = "Event category created successfully";
@@ -113,7 +122,8 @@ namespace Services.Services.EventCategoryService
                 {
                     EvCategoryId = eventCategory.EvCategoryId,
                     CategoryName = eventCategory.CategoryName,
-                    Description = eventCategory.Description
+                    Description = eventCategory.Description,
+                    UserId = eventCategory.UserId
                 };
             }
             catch (Exception ex)
@@ -121,6 +131,34 @@ namespace Services.Services.EventCategoryService
                 result.Message = ex.Message;
             }
 
+            return result;
+        }
+
+        public async Task<ResultModel> GetByUserIdAsync(Guid userId)
+        {
+            var result = new ResultModel();
+            try
+            {
+                var categories = await _repo.GetCategoriesByUserIdAsync(userId);
+
+                var categoryModels = categories.Select(c => new EventCategoryModel
+                {
+                    EvCategoryId = c.EvCategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description,
+                    UserId = c.UserId
+                }).ToList();
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Data = categoryModels;
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = ex.Message;
+            }
             return result;
         }
 
@@ -207,4 +245,4 @@ namespace Services.Services.EventCategoryService
             return result;
         }
     }
-} 
+}

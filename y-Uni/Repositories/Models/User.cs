@@ -34,6 +34,8 @@ public partial class User
     public string VerificationCode { get; set; }
 
     public DateTime? VerificationCodeExpiry { get; set; }
+    public virtual ICollection<EventCategory> EventCategories { get; set; } = new List<EventCategory>();
+    public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 
     public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
