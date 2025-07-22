@@ -11,5 +11,6 @@ namespace Repositories.Repositories
         Task<List<Event>> GetEventsByUserIdAsync(Guid userId);
         Task<List<Event>> GetUpcomingEventsByUserIdAsync(Guid userId, DateTime startDate, DateTime endDate);
         Task<List<Event>> GetEventsByCategoryAsync(Guid categoryId);
+        Task<bool> CheckCategoryExistsAsync(Guid categoryId);
     }
 } 

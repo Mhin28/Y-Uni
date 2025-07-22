@@ -39,5 +39,10 @@ namespace Repositories.Repositories
                 .OrderBy(e => e.StartDateTime)
                 .ToListAsync();
         }
+
+        public async Task<bool> CheckCategoryExistsAsync(Guid categoryId)
+        {
+            return await _context.EventCategories.AnyAsync(c => c.EvCategoryId == categoryId);
+        }
     }
 } 

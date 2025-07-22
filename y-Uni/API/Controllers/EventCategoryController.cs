@@ -45,6 +45,14 @@ namespace API.Controllers
 			return StatusCode(result.Code, result);
 		}
 
+		// GET: api/EventCategory/my
+		[HttpGet("my")]
+		public async Task<IActionResult> GetMyCategories()
+		{
+			var result = await _eventCategoryService.GetMyCategories();
+			return StatusCode(result.Code, result);
+		}
+
 		// POST: api/EventCategory
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] PostEventCategoryModel model)

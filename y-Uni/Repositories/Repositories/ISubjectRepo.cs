@@ -12,5 +12,6 @@ namespace Repositories.Repositories
         Task<List<Subject>> GetAllOrderedByNameAsync();
         Task<List<Subject>> GetSubjectsByUserIdAsync(Guid userId);
         Task<bool> IsSubjectInUseAsync(Guid subjectId);
+        Task<bool> SubjectNameExistsForUserAsync(string subjectName, Guid userId);
     }
 } 

@@ -12,5 +12,6 @@ namespace Repositories.Repositories
         Task<List<EventCategory>> GetAllOrderedByNameAsync();
         Task<List<EventCategory>> GetCategoriesByUserIdAsync(Guid userId);
         Task<bool> IsCategoryInUseAsync(Guid categoryId);
+        Task<bool> CategoryNameExistsForUserAsync(string categoryName, Guid userId);
     }
 } 

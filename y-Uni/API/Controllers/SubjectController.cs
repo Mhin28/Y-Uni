@@ -45,6 +45,14 @@ namespace API.Controllers
 			return StatusCode(result.Code, result);
 		}
 
+		// GET: api/Subject/my
+		[HttpGet("my")]
+		public async Task<IActionResult> GetMySubjects()
+		{
+			var result = await _subjectService.GetMySubjects();
+			return StatusCode(result.Code, result);
+		}
+
 		// POST: api/Subject
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] PostSubjectModel model)

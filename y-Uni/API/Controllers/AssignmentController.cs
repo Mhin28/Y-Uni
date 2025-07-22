@@ -19,13 +19,23 @@ namespace API.Controllers
 			_assignmentService = assignmentService;
 		}
 
+		private Guid GetUserIdFromToken()
+		{
+			var userIdClaim = User.FindFirst("userid")?.Value;
+			return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+		}
+
 		#region CRUD Operations
 
-		// GET: api/Assignment
+		// GET: api/Assignment - Get current user's assignments
 		[HttpGet]
 		public async Task<IActionResult> GetAll()
 		{
-			var result = await _assignmentService.GetAllAsync();
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
+			var result = await _assignmentService.GetByUserIdAsync(userId);
 			return StatusCode(result.Code, result);
 		}
 
@@ -41,7 +51,11 @@ namespace API.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] PostAssignmentModel model)
 		{
-			var result = await _assignmentService.AddAsync(model);
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
+			var result = await _assignmentService.AddAsync(model, userId);
 			return StatusCode(result.Code, result);
 		}
 
@@ -65,10 +79,14 @@ namespace API.Controllers
 
 		#region Filtering Endpoints
 
-		// GET: api/Assignment/user/{userId}
-		[HttpGet("user/{userId:guid}")]
-		public async Task<IActionResult> GetByUserId(Guid userId)
+		// GET: api/Assignment/my-assignments - Get current user's assignments
+		[HttpGet("my-assignments")]
+		public async Task<IActionResult> GetMyAssignments()
 		{
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
 			var result = await _assignmentService.GetByUserIdAsync(userId);
 			return StatusCode(result.Code, result);
 		}
@@ -81,18 +99,26 @@ namespace API.Controllers
 			return StatusCode(result.Code, result);
 		}
 
-		// GET: api/Assignment/upcoming/{userId}?dueDate=2023-12-31
-		[HttpGet("upcoming/{userId:guid}")]
-		public async Task<IActionResult> GetUpcoming(Guid userId, [FromQuery] DateTime? dueDate = null)
+		// GET: api/Assignment/upcoming?dueDate=2023-12-31
+		[HttpGet("upcoming")]
+		public async Task<IActionResult> GetUpcoming([FromQuery] DateTime? dueDate = null)
 		{
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
 			var result = await _assignmentService.GetUpcomingByUserIdAsync(userId, dueDate);
 			return StatusCode(result.Code, result);
 		}
 
-		// GET: api/Assignment/status/{userId}/{status}
-		[HttpGet("status/{userId:guid}/{status}")]
-		public async Task<IActionResult> GetByStatus(Guid userId, string status)
+		// GET: api/Assignment/status/{status}
+		[HttpGet("status/{status}")]
+		public async Task<IActionResult> GetByStatus(string status)
 		{
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
 			var result = await _assignmentService.GetByStatusAsync(userId, status);
 			return StatusCode(result.Code, result);
 		}

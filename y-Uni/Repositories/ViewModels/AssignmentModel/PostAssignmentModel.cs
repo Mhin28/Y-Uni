@@ -16,6 +16,5 @@ namespace Repositories.ViewModels.AssignmentModel
         
         public Guid? SubjectId { get; set; }
         
-        public Guid? UserId { get; set; }
     }
 } 

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Services.AssignmentService
@@ -13,10 +14,14 @@ namespace Services.Services.AssignmentService
     public class AssignmentService : IAssignmentService
     {
         private readonly IAssignmentRepo _repo;
+        private readonly IReminderRepo _reminderRepo;
+        private readonly IReminderTemplateRepo _reminderTemplateRepo;
 
-        public AssignmentService(IAssignmentRepo repo)
+        public AssignmentService(IAssignmentRepo repo, IReminderRepo reminderRepo, IReminderTemplateRepo reminderTemplateRepo)
         {
             _repo = repo;
+            _reminderRepo = reminderRepo;
+            _reminderTemplateRepo = reminderTemplateRepo;
         }
 
         public async Task<ResultModel> GetAllAsync()
@@ -43,7 +48,7 @@ namespace Services.Services.AssignmentService
             var result = new ResultModel();
             try
             {
-                var assignment = await _repo.GetByIdWithIncludesAsync(id);
+                var assignment = await _repo.GetByIdAsync(id);
                 if (assignment == null)
                 {
                     result.IsSuccess = false;
@@ -107,8 +112,8 @@ namespace Services.Services.AssignmentService
             var result = new ResultModel();
             try
             {
-                var endDate = dueDate ?? DateTime.Now.AddDays(7);
-                var assignments = await _repo.GetUpcomingAssignmentsByUserIdAsync(userId, endDate);
+                var targetDate = dueDate ?? DateTime.Now.AddDays(7);
+                var assignments = await _repo.GetUpcomingAssignmentsByUserIdAsync(userId, targetDate);
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
                 result.Data = assignments;
@@ -141,7 +146,7 @@ namespace Services.Services.AssignmentService
             return result;
         }
 
-        public async Task<ResultModel> AddAsync(PostAssignmentModel model)
+        public async Task<ResultModel> AddAsync(PostAssignmentModel model, Guid userId)
         {
             var result = new ResultModel
             {
@@ -152,6 +157,27 @@ namespace Services.Services.AssignmentService
 
             try
             {
+                // Validate due date is not in the past
+                if (model.DueDate <= DateTime.Now)
+                {
+                    result.Message = "Due date cannot be in the past";
+                    return result;
+                }
+
+                // Validate subject is required and exists
+                if (!model.SubjectId.HasValue)
+                {
+                    result.Message = "Subject ID is required";
+                    return result;
+                }
+
+                var subjectExists = await _repo.CheckSubjectExistsAsync(model.SubjectId.Value);
+                if (!subjectExists)
+                {
+                    result.Message = "Subject not found";
+                    return result;
+                }
+
                 var assignment = new Assignment
                 {
                     AssignmentId = Guid.NewGuid(),
@@ -162,17 +188,20 @@ namespace Services.Services.AssignmentService
                     PriorityId = model.PriorityId ?? 3,
                     EstimatedTime = model.EstimatedTime,
                     SubjectId = model.SubjectId,
-                    UserId = model.UserId
+                    UserId = userId
                 };
                 
                 await _repo.CreateAsync(assignment);
                 
-                // Reload the assignment with navigation properties included
+                // Auto-create email reminder
+                await CreateDefaultReminderForAssignment(assignment);
+                
+                // Reload with navigation properties
                 var createdAssignment = await _repo.GetByIdWithIncludesAsync(assignment.AssignmentId);
                 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
-                result.Message = "Assignment created successfully";
+                result.Message = "Assignment created successfully with reminder";
                 result.Data = createdAssignment ?? assignment;
             }
             catch (Exception ex)
@@ -204,9 +233,11 @@ namespace Services.Services.AssignmentService
                 assignment.Title = model.Title;
                 assignment.Description = model.Description;
                 assignment.DueDate = model.DueDate;
+                assignment.Status = model.Status;
                 assignment.PriorityId = model.PriorityId;
                 assignment.EstimatedTime = model.EstimatedTime;
                 assignment.SubjectId = model.SubjectId;
+                assignment.CompletedDate = model.CompletedDate;
 
                 await _repo.UpdateAsync(assignment);
 
@@ -229,19 +260,11 @@ namespace Services.Services.AssignmentService
             {
                 IsSuccess = false,
                 Code = (int)HttpStatusCode.BadRequest,
-                Message = "Update failed"
+                Message = "Status update failed"
             };
 
             try
             {
-                // Validate status value
-                var validStatuses = new[] { "not_started", "in_progress", "completed" };
-                if (!validStatuses.Contains(status?.ToLower()))
-                {
-                    result.Message = $"Invalid status. Valid values are: {string.Join(", ", validStatuses)}";
-                    return result;
-                }
-
                 var assignment = await _repo.GetByIdAsync(id);
                 if (assignment == null)
                 {
@@ -249,22 +272,17 @@ namespace Services.Services.AssignmentService
                     return result;
                 }
 
-                assignment.Status = status.ToLower();
-                
-                if (status == "completed" && assignment.CompletedDate == null)
+                assignment.Status = status;
+                if (status == "completed")
                 {
                     assignment.CompletedDate = DateTime.Now;
-                }
-                else if (status != "completed")
-                {
-                    assignment.CompletedDate = null;
                 }
 
                 await _repo.UpdateAsync(assignment);
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
-                result.Message = "Assignment status updated successfully";
+                result.Message = "Status updated successfully";
                 result.Data = assignment;
             }
             catch (Exception ex)
@@ -277,38 +295,7 @@ namespace Services.Services.AssignmentService
 
         public async Task<ResultModel> CompleteAssignmentAsync(Guid id)
         {
-            var result = new ResultModel
-            {
-                IsSuccess = false,
-                Code = (int)HttpStatusCode.BadRequest,
-                Message = "Update failed"
-            };
-
-            try
-            {
-                var assignment = await _repo.GetByIdAsync(id);
-                if (assignment == null)
-                {
-                    result.Message = "Assignment not found";
-                    return result;
-                }
-
-                assignment.Status = "completed";
-                assignment.CompletedDate = DateTime.Now;
-
-                await _repo.UpdateAsync(assignment);
-
-                result.IsSuccess = true;
-                result.Code = (int)HttpStatusCode.OK;
-                result.Message = "Assignment completed successfully";
-                result.Data = assignment;
-            }
-            catch (Exception ex)
-            {
-                result.Message = ex.Message;
-            }
-
-            return result;
+            return await UpdateStatusAsync(id, "completed");
         }
 
         public async Task<ResultModel> DeleteAsync(Guid id)
@@ -342,5 +329,63 @@ namespace Services.Services.AssignmentService
 
             return result;
         }
+
+        private async Task CreateDefaultReminderForAssignment(Assignment assignment)
+        {
+            try
+            {
+                // Get customizable template or use default logic
+                var defaultTemplate = await _reminderTemplateRepo.GetDefaultAssignmentTemplateAsync();
+                
+                // Default: 2 days (2880 minutes) before due date for assignments
+                int minutesBeforeDue = 2880; // 48 hours = 2880 minutes
+                if (defaultTemplate != null && defaultTemplate.TriggerValue.HasValue)
+                {
+                    minutesBeforeDue = defaultTemplate.TriggerValue.Value;
+                }
+
+                var reminderTime = assignment.DueDate.AddMinutes(-minutesBeforeDue);
+                
+                // Only create reminder if it's in the future
+                if (reminderTime > DateTime.Now)
+                {
+                    var reminder = new Reminder
+                    {
+                        ReminderId = Guid.NewGuid(),
+                        AssignmentId = assignment.AssignmentId,
+                        UserId = assignment.UserId,
+                        TemplateId = defaultTemplate?.TemplateId,
+                        ReminderTime = reminderTime,
+                        Status = "pending",
+                        NotificationChannel = "email"
+                    };
+
+                    await _reminderRepo.CreateAsync(reminder);
+                    
+                    // Convert minutes to human-readable format for logging
+                    var hours = minutesBeforeDue / 60;
+                    var remainingMinutes = minutesBeforeDue % 60;
+                    var timeDescription = hours > 0 ? 
+                        (remainingMinutes > 0 ? $"{hours}h {remainingMinutes}m" : $"{hours}h") : 
+                        $"{minutesBeforeDue}m";
+                    
+                    System.Console.WriteLine($"SUCCESS: Assignment reminder created for {reminderTime} ({timeDescription} before due date)");
+                }
+                else
+                {
+                    var hours = minutesBeforeDue / 60;
+                    var remainingMinutes = minutesBeforeDue % 60;
+                    var timeDescription = hours > 0 ? 
+                        (remainingMinutes > 0 ? $"{hours}h {remainingMinutes}m" : $"{hours}h") : 
+                        $"{minutesBeforeDue}m";
+                    
+                    System.Console.WriteLine($"SKIPPED: Assignment reminder time {reminderTime} is in the past (would be {timeDescription} before due date)");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"ERROR creating assignment reminder: {ex.Message}");
+            }
+        }
     }
-} 
+}

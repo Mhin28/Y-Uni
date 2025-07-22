@@ -10,6 +10,7 @@ namespace Repositories.Repositories
 {
 	public interface IReminderTemplateRepo : IGenericRepository<ReminderTemplate>
 	{
-
+		Task<ReminderTemplate> GetDefaultAssignmentTemplateAsync();
+		Task<ReminderTemplate> GetDefaultEventTemplateAsync();
 	}
 }

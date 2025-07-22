@@ -64,5 +64,10 @@ namespace Repositories.Repositories
                 .Include(a => a.Reminders)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<bool> CheckSubjectExistsAsync(Guid subjectId)
+        {
+            return await _context.Subjects.AnyAsync(s => s.SubjectId == subjectId);
+        }
     }
 }

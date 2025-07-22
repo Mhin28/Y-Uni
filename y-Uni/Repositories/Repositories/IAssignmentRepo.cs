@@ -13,5 +13,6 @@ namespace Repositories.Repositories
         Task<List<Assignment>> GetUpcomingAssignmentsByUserIdAsync(Guid userId, DateTime dueDate);
         Task<List<Assignment>> GetAssignmentsByStatusAsync(Guid userId, string status);
         Task<Assignment> GetByIdWithIncludesAsync(Guid id);
+        Task<bool> CheckSubjectExistsAsync(Guid subjectId);
     }
 }

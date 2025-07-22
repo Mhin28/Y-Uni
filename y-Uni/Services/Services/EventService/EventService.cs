@@ -12,10 +12,14 @@ namespace Services.Services.EventService
     public class EventService : IEventService
     {
         private readonly IEventRepo _repo;
+        private readonly IReminderRepo _reminderRepo;
+        private readonly IReminderTemplateRepo _reminderTemplateRepo;
 
-        public EventService(IEventRepo repo)
+        public EventService(IEventRepo repo, IReminderRepo reminderRepo, IReminderTemplateRepo reminderTemplateRepo)
         {
             _repo = repo;
+            _reminderRepo = reminderRepo;
+            _reminderTemplateRepo = reminderTemplateRepo;
         }
 
         public async Task<ResultModel> GetAllAsync()
@@ -69,9 +73,27 @@ namespace Services.Services.EventService
             try
             {
                 var events = await _repo.GetEventsByUserIdAsync(userId);
+                
+                // Generate virtual occurrences for recurring events
+                var expandedEvents = new List<object>();
+                foreach (var eventItem in events)
+                {
+                    if (eventItem.RecurrencePattern != null && eventItem.RecurrencePattern != "none")
+                    {
+                        // Generate occurrences for the next 3 months
+                        var occurrences = GenerateEventOccurrences(eventItem, DateTime.Now, DateTime.Now.AddMonths(3));
+                        expandedEvents.AddRange(occurrences);
+                    }
+                    else
+                    {
+                        // Single occurrence event
+                        expandedEvents.Add(eventItem);
+                    }
+                }
+                
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
-                result.Data = events;
+                result.Data = expandedEvents;
             }
             catch (Exception ex)
             {
@@ -120,7 +142,7 @@ namespace Services.Services.EventService
             return result;
         }
 
-        public async Task<ResultModel> AddAsync(PostEventModel model)
+        public async Task<ResultModel> AddAsync(PostEventModel model, Guid userId)
         {
             var result = new ResultModel
             {
@@ -131,10 +153,31 @@ namespace Services.Services.EventService
 
             try
             {
+                // Validate start time is not in the past
+                if (model.StartDateTime <= DateTime.Now)
+                {
+                    result.Message = "Start time cannot be in the past";
+                    return result;
+                }
+
                 // Validate end time is after start time
                 if (model.EndDateTime <= model.StartDateTime)
                 {
                     result.Message = "End time must be after start time";
+                    return result;
+                }
+
+                // Validate event category is required and exists
+                if (!model.EvCategoryId.HasValue)
+                {
+                    result.Message = "Event category ID is required";
+                    return result;
+                }
+
+                var categoryExists = await _repo.CheckCategoryExistsAsync(model.EvCategoryId.Value);
+                if (!categoryExists)
+                {
+                    result.Message = "Event category not found";
                     return result;
                 }
 
@@ -148,14 +191,17 @@ namespace Services.Services.EventService
                     RecurrencePattern = model.RecurrencePattern ?? "none",
                     RecurrenceEndDate = model.RecurrenceEndDate,
                     EvCategoryId = model.EvCategoryId,
-                    UserId = model.UserId
+                    UserId = userId // Use userId from JWT token
                 };
                 
                 await _repo.CreateAsync(eventEntity);
                 
+                // Auto-create email reminder based on default template
+                await CreateDefaultReminderForEvent(eventEntity);
+                
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
-                result.Message = "Event created successfully";
+                result.Message = "Event created successfully with reminder";
                 result.Data = eventEntity;
             }
             catch (Exception ex)
@@ -244,6 +290,128 @@ namespace Services.Services.EventService
             }
 
             return result;
+        }
+
+        private async Task CreateDefaultReminderForEvent(Event eventEntity)
+        {
+            try
+            {
+                // Get customizable template or use default logic
+                var defaultTemplate = await _reminderTemplateRepo.GetDefaultEventTemplateAsync();
+                
+                // Default: 30 minutes before event start time
+                int minutesBeforeStart = 30;
+                if (defaultTemplate != null && defaultTemplate.TriggerValue.HasValue)
+                {
+                    minutesBeforeStart = defaultTemplate.TriggerValue.Value;
+                }
+
+                var reminderTime = eventEntity.StartDateTime.AddMinutes(-minutesBeforeStart);
+                
+                // Only create reminder if it's in the future
+                if (reminderTime > DateTime.Now)
+                {
+                    var reminder = new Reminder
+                    {
+                        ReminderId = Guid.NewGuid(),
+                        EventId = eventEntity.EventId,
+                        UserId = eventEntity.UserId,
+                        TemplateId = defaultTemplate?.TemplateId,
+                        ReminderTime = reminderTime,
+                        Status = "pending",
+                        NotificationChannel = "email"
+                    };
+
+                    await _reminderRepo.CreateAsync(reminder);
+                    
+                    System.Console.WriteLine($"SUCCESS: Event reminder created for {reminderTime} ({minutesBeforeStart} minutes before start time)");
+                }
+                else
+                {
+                    System.Console.WriteLine($"SKIPPED: Event reminder time {reminderTime} is in the past (would be {minutesBeforeStart} minutes before start time)");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail event creation
+                System.Console.WriteLine($"ERROR creating event reminder: {ex.Message}");
+                System.Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+        }
+
+        private List<object> GenerateEventOccurrences(Event baseEvent, DateTime startDate, DateTime endDate)
+        {
+            var occurrences = new List<object>();
+            
+            if (baseEvent.RecurrencePattern == "none" || string.IsNullOrEmpty(baseEvent.RecurrencePattern))
+            {
+                // Single occurrence
+                if (baseEvent.StartDateTime >= startDate && baseEvent.StartDateTime <= endDate)
+                {
+                    occurrences.Add(new
+                    {
+                        EventId = baseEvent.EventId,
+                        Title = baseEvent.Title,
+                        Description = baseEvent.Description,
+                        StartDateTime = baseEvent.StartDateTime,
+                        EndDateTime = baseEvent.EndDateTime,
+                        RecurrencePattern = baseEvent.RecurrencePattern,
+                        EvCategoryId = baseEvent.EvCategoryId,
+                        UserId = baseEvent.UserId,
+                        IsRecurring = false,
+                        OriginalEventId = baseEvent.EventId,
+                        OccurrenceDate = baseEvent.StartDateTime.Date
+                    });
+                }
+                return occurrences;
+            }
+            
+            // Calculate recurring occurrences
+            var current = baseEvent.StartDateTime;
+            var duration = baseEvent.EndDateTime - baseEvent.StartDateTime;
+            int occurrenceCount = 0;
+            const int maxOccurrences = 100; // Safety limit
+            
+            while (current <= endDate && occurrenceCount < maxOccurrences)
+            {
+                // Check if we've reached the recurrence end date
+                if (baseEvent.RecurrenceEndDate.HasValue && current.Date > baseEvent.RecurrenceEndDate.Value.ToDateTime(TimeOnly.MinValue))
+                {
+                    break;
+                }
+                
+                if (current >= startDate)
+                {
+                    occurrences.Add(new
+                    {
+                        EventId = Guid.NewGuid(), // Virtual occurrence ID
+                        Title = baseEvent.Title,
+                        Description = baseEvent.Description,
+                        StartDateTime = current,
+                        EndDateTime = current + duration,
+                        RecurrencePattern = baseEvent.RecurrencePattern,
+                        EvCategoryId = baseEvent.EvCategoryId,
+                        UserId = baseEvent.UserId,
+                        IsRecurring = true,
+                        OriginalEventId = baseEvent.EventId,
+                        OccurrenceDate = current.Date
+                    });
+                }
+                
+                // Move to next occurrence based on pattern
+                current = baseEvent.RecurrencePattern.ToLower() switch
+                {
+                    "daily" => current.AddDays(1),
+                    "weekly" => current.AddDays(7),
+                    "monthly" => current.AddMonths(1),
+                    "yearly" => current.AddYears(1),
+                    _ => current.AddYears(100) // Break the loop for unknown patterns
+                };
+                
+                occurrenceCount++;
+            }
+            
+            return occurrences;
         }
     }
 } 

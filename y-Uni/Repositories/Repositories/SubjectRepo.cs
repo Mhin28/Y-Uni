@@ -38,5 +38,11 @@ namespace Repositories.Repositories
                 .OrderBy(s => s.SubjectName)
                 .ToListAsync();
         }
+
+        public async Task<bool> SubjectNameExistsForUserAsync(string subjectName, Guid userId)
+        {
+            return await _context.Subjects
+                .AnyAsync(s => s.SubjectName.ToLower() == subjectName.ToLower() && s.UserId == userId);
+        }
     }
 }
