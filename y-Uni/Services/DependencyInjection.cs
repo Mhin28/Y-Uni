@@ -25,6 +25,9 @@ using Services.Services.TokenService;
 using Services.Services.UserContextService;
 using Services.Services.UserService;
 using Services.Services.Validate;
+using Services.Services.GeminiAIService;
+using Services.Services.ContextService;
+using Services.Services.ConflictDetectionService;
 
 namespace Services
 {
@@ -58,6 +61,12 @@ namespace Services
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IBudgetService, BudgetService>();
             services.AddScoped<IInvestmentService, InvestmentService>();
+            
+            // AI Services
+            services.AddSingleton<IGeminiAIService, GeminiAIService>();
+            services.AddScoped<IContextService, ContextService>();
+            services.AddScoped<IConflictDetectionService, ConflictDetectionService>();
+            
             services.AddHttpContextAccessor();
 
             return services;

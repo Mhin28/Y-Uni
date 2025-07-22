@@ -69,5 +69,17 @@ namespace Repositories.Repositories
         {
             return await _context.Subjects.AnyAsync(s => s.SubjectId == subjectId);
         }
+
+        public async Task<List<Assignment>> GetAssignmentsDueInRangeAsync(Guid userId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Assignments
+                .Where(a => a.UserId == userId && 
+                           a.DueDate >= startDate && 
+                           a.DueDate <= endDate)
+                .Include(a => a.Subject)
+                .Include(a => a.Priority)
+                .OrderBy(a => a.DueDate)
+                .ToListAsync();
+        }
     }
 }

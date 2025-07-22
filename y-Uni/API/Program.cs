@@ -2,6 +2,9 @@ using Repositories.Models; // Add this if not already present
 using Microsoft.EntityFrameworkCore;
 using Services;
 using Repositories; // Add this if not already present
+using FluentValidation;
+using API.DTOs.Ai;
+using API.Validators;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +24,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
+
+// Add FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<ChatCreateRequestValidator>();
 
 // Register the byte constraint
 builder.Services.Configure<RouteOptions>(options =>
