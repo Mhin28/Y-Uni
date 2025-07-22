@@ -50,7 +50,7 @@ namespace API.Services
             var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
 
             // Get all pending reminders that are due
-            var dueReminders = await reminderRepo.GetDueRemindersAsync(DateTime.UtcNow);
+            var dueReminders = await reminderRepo.GetDueRemindersAsync(DateTime.Now);
 
             _logger.LogInformation($"Found {dueReminders.Count} due reminders to process");
 
@@ -66,6 +66,13 @@ namespace API.Services
                     
                     // Mark as failed
                     reminder.Status = "failed";
+                    
+                    // Clear navigation properties to avoid tracking conflicts
+                    reminder.User = null;
+                    reminder.Assignment = null;
+                    reminder.Event = null;
+                    reminder.Template = null;
+                    
                     await reminderRepo.UpdateAsync(reminder);
                 }
             }
@@ -98,6 +105,13 @@ namespace API.Services
 
             // Update reminder status
             reminder.Status = success ? "sent" : "failed";
+            
+            // Clear navigation properties to avoid tracking conflicts
+            reminder.User = null;
+            reminder.Assignment = null;
+            reminder.Event = null;
+            reminder.Template = null;
+            
             await reminderRepo.UpdateAsync(reminder);
 
             _logger.LogInformation($"Reminder {reminder.ReminderId} marked as {reminder.Status}");
