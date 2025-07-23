@@ -1,4 +1,4 @@
-namespace API.DTOs.Ai;
+namespace Repositories.ViewModels.AiModels;
 
 public class AIOption
 {
@@ -11,4 +11,8 @@ public class AIOption
     public string ReminderType { get; set; } = string.Empty; // "template" or "custom"
     public int ReminderValueMinutes { get; set; }
     public string Reasoning { get; set; } = string.Empty;
+    
+    // New fields for subject/category
+    public string? SubjectName { get; set; } // For assignments
+    public string? CategoryName { get; set; } // For events
 }

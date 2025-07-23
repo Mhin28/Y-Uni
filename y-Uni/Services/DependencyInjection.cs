@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Services.Services.AccountService;
 using Services.Services.AssignmentService;
 using Services.Services.AuthenticateService;
@@ -63,7 +64,8 @@ namespace Services
             services.AddScoped<IInvestmentService, InvestmentService>();
             
             // AI Services
-            services.AddSingleton<IGeminiAIService, GeminiAIService>();
+            services.AddHttpClient();
+            services.AddScoped<IGeminiAIService, GeminiAIService>();
             services.AddScoped<IContextService, ContextService>();
             services.AddScoped<IConflictDetectionService, ConflictDetectionService>();
             

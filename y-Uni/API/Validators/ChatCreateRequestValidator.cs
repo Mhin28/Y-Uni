@@ -1,5 +1,5 @@
 using FluentValidation;
-using API.DTOs.Ai;
+using Repositories.ViewModels.AiModels;
 
 namespace API.Validators;
 

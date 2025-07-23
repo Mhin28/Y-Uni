@@ -1,47 +1,75 @@
-using Google.GenerativeAI;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
-using API.DTOs.Ai;
+using Repositories.ViewModels.AiModels;
+using System.Text;
 
 namespace Services.Services.GeminiAIService;
 
 public class GeminiAIService : IGeminiAIService
 {
-    private readonly GenerativeModel _geminiModel;
+    private readonly HttpClient _httpClient;
+    private readonly string _apiKey;
+    private readonly string _model;
 
-    public GeminiAIService(IConfiguration config)
+    public GeminiAIService(HttpClient httpClient, IConfiguration config)
     {
-        var apiKey = config["GeminiAI:ApiKey"] ?? throw new ArgumentNullException("GeminiAI:ApiKey not configured");
-        var modelName = config["GeminiAI:Model"] ?? "gemini-2.0-flash-exp";
-
-        var generationTool = new Tool
-        {
-            FunctionDeclarations = new[] { GetFunctionDeclaration() }
-        };
-
-        _geminiModel = new GenerativeModel(apiKey,
-            model: modelName,
-            tools: new[] { generationTool });
+        _httpClient = httpClient;
+        _apiKey = config["GeminiAI:ApiKey"] ?? throw new ArgumentNullException("GeminiAI:ApiKey not configured");
+        _model = config["GeminiAI:Model"] ?? "gemini-2.5-flash";
     }
 
     public async Task<List<AIOption>> GenerateOptions(string userMessage, string context)
     {
-        var chat = _geminiModel.StartChat();
         var prompt = BuildPrompt(userMessage, context);
-
-        var response = await chat.SendMessageAsync(prompt);
-
-        // The response should contain a function call to our declared function
-        var functionCall = response.GetFunctionCalls().FirstOrDefault();
-        if (functionCall == null)
+        
+        var requestBody = new
         {
-            // Fallback or error handling if the AI didn't use the tool
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = prompt }
+                    }
+                }
+            },
+            tools = new[]
+            {
+                new
+                {
+                    function_declarations = new[]
+                    {
+                        GetFunctionDeclaration()
+                    }
+                }
+            }
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
+        var response = await _httpClient.PostAsync(url, content);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Gemini API error: {response.StatusCode} - {errorContent}");
+        }
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var geminiResponse = JsonSerializer.Deserialize<GeminiResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        
+        // Extract function call from response
+        var functionCall = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.FunctionCall;
+        if (functionCall?.Args == null)
+        {
             throw new InvalidOperationException("AI did not return the expected function call.");
         }
 
-        // The arguments are a dictionary. We convert them to JSON and then deserialize.
-        var jsonArgs = JsonSerializer.Serialize(functionCall.Arguments);
-        var parsedArgs = JsonSerializer.Deserialize<FunctionCallArgs>(jsonArgs, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var optionsJson = JsonSerializer.Serialize(functionCall.Args);
+        var parsedArgs = JsonSerializer.Deserialize<FunctionCallArgs>(optionsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         
         return parsedArgs?.Options ?? new List<AIOption>();
     }
@@ -70,48 +98,74 @@ public class GeminiAIService : IGeminiAIService
         ";
     }
 
-    private FunctionDeclaration GetFunctionDeclaration()
+    private object GetFunctionDeclaration()
     {
-        // This is the C# representation of the JSON schema
-        return new FunctionDeclaration
+        return new
         {
-            Name = "generate_assignment_event_options",
-            Description = "Generates 3 options for creating a new assignment or event for the user to choose from.",
-            Parameters = new OpenApiSchema
+            name = "generate_assignment_event_options",
+            description = "Generates 3 options for creating a new assignment or event for the user to choose from.",
+            parameters = new
             {
-                Type = OpenApiType.Object,
-                Properties =
+                type = "object",
+                properties = new
                 {
-                    { "options", new OpenApiSchema
+                    options = new
+                    {
+                        type = "array",
+                        description = "An array of exactly 3 assignment or event options.",
+                        items = new
                         {
-                            Type = OpenApiType.Array,
-                            Description = "An array of exactly 3 assignment or event options.",
-                            Items = new OpenApiSchema
+                            type = "object",
+                            properties = new
                             {
-                                Type = OpenApiType.Object,
-                                Properties =
-                                {
-                                    { "type", new OpenApiSchema { Type = OpenApiType.String, Description = "'assignment' or 'event'" } },
-                                    { "title", new OpenApiSchema { Type = OpenApiType.String } },
-                                    { "description", new OpenApiSchema { Type = OpenApiType.String } },
-                                    { "dueDate", new OpenApiSchema { Type = OpenApiType.String, Format = "date-time" } },
-                                    { "priority", new OpenApiSchema { Type = OpenApiType.String, Enum = new List<string> { "Low", "Medium", "High" } } },
-                                    { "estimatedTimeMinutes", new OpenApiSchema { Type = OpenApiType.Integer, Description = "Estimated time in minutes" } },
-                                    { "reminderType", new OpenApiSchema { Type = OpenApiType.String, Description = "'template' or 'custom'" } },
-                                    { "reminderValueMinutes", new OpenApiSchema { Type = OpenApiType.Integer, Description = "Reminder time in minutes before the due date" } },
-                                    { "reasoning", new OpenApiSchema { Type = OpenApiType.String, Description = "A brief explanation of why this option is suggested." } }
-                                },
-                                Required = new List<string> { "type", "title", "dueDate", "priority", "reasoning" }
-                            }
+                                type = new { type = "string", description = "'assignment' or 'event'" },
+                                title = new { type = "string" },
+                                description = new { type = "string" },
+                                dueDate = new { type = "string", format = "date-time" },
+                                priority = new { type = "string", @enum = new[] { "Low", "Medium", "High" } },
+                                estimatedTimeMinutes = new { type = "integer", description = "Estimated time in minutes" },
+                                reminderType = new { type = "string", description = "'template' or 'custom'" },
+                                reminderValueMinutes = new { type = "integer", description = "Reminder time in minutes before the due date" },
+                                reasoning = new { type = "string", description = "A brief explanation of why this option is suggested." },
+                                subjectName = new { type = "string", description = "Subject name for assignments (choose from available subjects or suggest new one)" },
+                                categoryName = new { type = "string", description = "Category name for events (choose from available categories or suggest new one)" }
+                            },
+                            required = new[] { "type", "title", "dueDate", "priority", "reasoning" }
                         }
                     }
                 },
-                Required = new List<string> { "options" }
+                required = new[] { "options" }
             }
         };
     }
 
-    // Helper class for deserializing the function call arguments
+    // Helper classes for deserializing the Gemini API response
+    private class GeminiResponse
+    {
+        public List<Candidate>? Candidates { get; set; }
+    }
+
+    private class Candidate
+    {
+        public Content? Content { get; set; }
+    }
+
+    private class Content
+    {
+        public List<Part>? Parts { get; set; }
+    }
+
+    private class Part
+    {
+        public FunctionCall? FunctionCall { get; set; }
+    }
+
+    private class FunctionCall
+    {
+        public string? Name { get; set; }
+        public object? Args { get; set; }
+    }
+
     private class FunctionCallArgs
     {
         public List<AIOption> Options { get; set; } = new();

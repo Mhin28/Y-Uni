@@ -1,4 +1,4 @@
-using API.DTOs.Ai;
+using Repositories.ViewModels.AiModels;
 using Repositories.Repositories;
 
 namespace Services.Services.ConflictDetectionService;

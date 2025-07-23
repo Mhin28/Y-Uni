@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Services;
 using Repositories; // Add this if not already present
 using FluentValidation;
-using API.DTOs.Ai;
 using API.Validators;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

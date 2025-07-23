@@ -1,4 +1,4 @@
-namespace API.DTOs.Ai;
+namespace Repositories.ViewModels.AiModels;
 
 public class ChatCreateResponse
 {
