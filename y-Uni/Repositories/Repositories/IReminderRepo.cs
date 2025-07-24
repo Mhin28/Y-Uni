@@ -16,5 +16,6 @@ namespace Repositories.Repositories
 		Task<IEnumerable<Reminder>> GetRemindersByTemplateIdAsync(Guid templateId);
 		Task<IEnumerable<Reminder>> GetRemindersByStatusAsync(string status);
 		Task<IEnumerable<Reminder>> GetRemindersByNotificationChannelAsync(string notificationChannel);
+		Task<List<Reminder>> GetDueRemindersAsync(DateTime currentTime);
 	}
 }

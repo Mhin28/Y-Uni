@@ -54,5 +54,27 @@ namespace Services.Services.EmailService
 
             await smtpClient.SendMailAsync(mailMessage);
         }
+
+        public async Task SendReminderEmailAsync(string toEmail, string subject, string body)
+        {
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("yunibuddy18@gmail.com", "pjue wfbe qsfe mwhp"),
+                EnableSsl = true,
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("yunibuddy18@gmail.com"),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true,
+            };
+
+            mailMessage.To.Add(toEmail);
+
+            await smtpClient.SendMailAsync(mailMessage);
+        }
     }
 }

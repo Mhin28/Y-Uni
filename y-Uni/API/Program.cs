@@ -2,6 +2,8 @@ using Repositories.Models; // Add this if not already present
 using Microsoft.EntityFrameworkCore;
 using Services;
 using Repositories; // Add this if not already present
+using FluentValidation;
+using API.Validators;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +17,15 @@ builder.Services.AddDbContext<YUniContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
+
+// Add FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<ChatCreateRequestValidator>();
 
 // Register the byte constraint
 builder.Services.Configure<RouteOptions>(options =>
@@ -37,6 +47,9 @@ builder.Services.AddCors(options =>
 builder.Services
     .AddService(builder.Configuration)
     .AddRepository(builder.Configuration);
+
+// Add Background Service for processing reminders
+builder.Services.AddHostedService<API.Services.ReminderBackgroundService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer("Bearer", options =>
     {
@@ -81,12 +94,14 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -36,7 +36,7 @@ namespace Repositories.Repositories
         {
             return await _context.Assignments
                 .Where(a => a.UserId == userId && 
-                          a.DueDate <= dueDate && 
+                          a.DueDate <= dueDate && a.DueDate >= DateTime.UtcNow &&
                           (a.Status == "not_started" || a.Status == "in_progress"))
                 .Include(a => a.Subject)
                 .Include(a => a.Priority)
@@ -48,6 +48,34 @@ namespace Repositories.Repositories
         {
             return await _context.Assignments
                 .Where(a => a.UserId == userId && a.Status == status)
+                .Include(a => a.Subject)
+                .Include(a => a.Priority)
+                .OrderBy(a => a.DueDate)
+                .ToListAsync();
+        }
+
+        public async Task<Assignment> GetByIdWithIncludesAsync(Guid id)
+        {
+            return await _context.Assignments
+                .Where(a => a.AssignmentId == id)
+                .Include(a => a.Priority)
+                .Include(a => a.Subject)
+                .Include(a => a.User)
+                .Include(a => a.Reminders)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> CheckSubjectExistsAsync(Guid subjectId)
+        {
+            return await _context.Subjects.AnyAsync(s => s.SubjectId == subjectId);
+        }
+
+        public async Task<List<Assignment>> GetAssignmentsDueInRangeAsync(Guid userId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Assignments
+                .Where(a => a.UserId == userId && 
+                           a.DueDate >= startDate && 
+                           a.DueDate <= endDate)
                 .Include(a => a.Subject)
                 .Include(a => a.Priority)
                 .OrderBy(a => a.DueDate)

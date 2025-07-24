@@ -9,5 +9,6 @@ namespace Services.Services.EmailService
     public interface IEmailService
     {
         Task SendVerificationEmailAsync(string toEmail, string code);
+        Task SendReminderEmailAsync(string toEmail, string subject, string body);
     }
 }

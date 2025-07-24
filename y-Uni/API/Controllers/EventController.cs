@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.EventModel;
 using Services.Services.EventService;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class EventController : ControllerBase
 	{
 		private readonly IEventService _eventService;
@@ -17,13 +19,23 @@ namespace API.Controllers
 			_eventService = eventService;
 		}
 
+		private Guid GetUserIdFromToken()
+		{
+			var userIdClaim = User.FindFirst("userid")?.Value;
+			return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+		}
+
 		#region CRUD Operations
 
-		// GET: api/Event
+		// GET: api/Event - Get current user's events
 		[HttpGet]
 		public async Task<IActionResult> GetAll()
 		{
-			var result = await _eventService.GetAllAsync();
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
+			var result = await _eventService.GetByUserIdAsync(userId);
 			return StatusCode(result.Code, result);
 		}
 
@@ -39,7 +51,11 @@ namespace API.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] PostEventModel model)
 		{
-			var result = await _eventService.AddAsync(model);
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
+			var result = await _eventService.AddAsync(model, userId);
 			return StatusCode(result.Code, result);
 		}
 
@@ -63,18 +79,26 @@ namespace API.Controllers
 
 		#region Filtering Endpoints
 
-		// GET: api/Event/user/{userId}
-		[HttpGet("user/{userId:guid}")]
-		public async Task<IActionResult> GetByUserId(Guid userId)
+		// GET: api/Event/my-events - Get current user's events
+		[HttpGet("my-events")]
+		public async Task<IActionResult> GetMyEvents()
 		{
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
 			var result = await _eventService.GetByUserIdAsync(userId);
 			return StatusCode(result.Code, result);
 		}
 
-		// GET: api/Event/upcoming/{userId}
-		[HttpGet("upcoming/{userId:guid}")]
-		public async Task<IActionResult> GetUpcoming(Guid userId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+		// GET: api/Event/upcoming
+		[HttpGet("upcoming")]
+		public async Task<IActionResult> GetUpcoming([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
 		{
+			var userId = GetUserIdFromToken();
+			if (userId == Guid.Empty)
+				return Unauthorized("Invalid token");
+
 			var result = await _eventService.GetUpcomingByUserIdAsync(userId, startDate, endDate);
 			return StatusCode(result.Code, result);
 		}

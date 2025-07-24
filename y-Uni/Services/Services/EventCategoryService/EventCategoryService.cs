@@ -2,6 +2,7 @@ using Repositories.Models;
 using Repositories.Repositories;
 using Repositories.ViewModels.EventCategoryModel;
 using Repositories.ViewModels.ResultModels;
+using Services.Services.UserContextService;
 using System;
 using System.Linq;
 using System.Net;
@@ -12,10 +13,12 @@ namespace Services.Services.EventCategoryService
     public class EventCategoryService : IEventCategoryService
     {
         private readonly IEventCategoryRepo _repo;
+        private readonly IUserContextService _userContext;
 
-        public EventCategoryService(IEventCategoryRepo repo)
+        public EventCategoryService(IEventCategoryRepo repo, IUserContextService userContext)
         {
             _repo = repo;
+            _userContext = userContext;
         }
 
         public async Task<ResultModel> GetAllAsync()
@@ -24,14 +27,15 @@ namespace Services.Services.EventCategoryService
             try
             {
                 var categories = await _repo.GetAllOrderedByNameAsync();
-                
+
                 var categoryModels = categories.Select(c => new EventCategoryModel
                 {
                     EvCategoryId = c.EvCategoryId,
                     CategoryName = c.CategoryName,
-                    Description = c.Description
+                    Description = c.Description,
+                    UserId = c.UserId
                 }).ToList();
-                
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
                 result.Data = categoryModels;
@@ -63,7 +67,8 @@ namespace Services.Services.EventCategoryService
                 {
                     EvCategoryId = category.EvCategoryId,
                     CategoryName = category.CategoryName,
-                    Description = category.Description
+                    Description = category.Description,
+                    UserId = category.UserId
                 };
 
                 result.IsSuccess = true;
@@ -97,22 +102,36 @@ namespace Services.Services.EventCategoryService
                     return result;
                 }
 
+                // Get userId from token automatically
+                var currentUserId = _userContext.GetCurrentUserId();
+
+                // Check if category name already exists for this user
+                var nameExists = await _repo.CategoryNameExistsForUserAsync(model.CategoryName, currentUserId);
+                if (nameExists)
+                {
+                    result.Message = "Category name already exists for this user";
+                    return result;
+                }
+
                 var eventCategory = new EventCategory
                 {
                     EvCategoryId = Guid.NewGuid(),
                     CategoryName = model.CategoryName,
-                    Description = model.Description
+                    Description = model.Description,
+                    UserId = currentUserId
                 };
-                
+
                 await _repo.CreateAsync(eventCategory);
-                
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.Created;
+                result.Message = "Event category created successfully";
                 result.Data = new EventCategoryModel
                 {
                     EvCategoryId = eventCategory.EvCategoryId,
                     CategoryName = eventCategory.CategoryName,
-                    Description = eventCategory.Description
+                    Description = eventCategory.Description,
+                    UserId = eventCategory.UserId
                 };
             }
             catch (Exception ex)
@@ -120,6 +139,69 @@ namespace Services.Services.EventCategoryService
                 result.Message = ex.Message;
             }
 
+            return result;
+        }
+
+        public async Task<ResultModel> GetByUserIdAsync(Guid userId)
+        {
+            var result = new ResultModel();
+            try
+            {
+                var categories = await _repo.GetCategoriesByUserIdAsync(userId);
+
+                var categoryModels = categories.Select(c => new EventCategoryModel
+                {
+                    EvCategoryId = c.EvCategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description,
+                    UserId = c.UserId
+                }).ToList();
+
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Data = categoryModels;
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+
+        public async Task<ResultModel> GetMyCategories()
+        {
+            var result = new ResultModel();
+            try
+            {
+                var currentUserId = _userContext.GetCurrentUserId();
+                var categories = await _repo.GetCategoriesByUserIdAsync(currentUserId);
+                
+                var categoryModels = categories.Select(c => new EventCategoryModel
+                {
+                    EvCategoryId = c.EvCategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description,
+                    UserId = c.UserId
+                }).ToList();
+                
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Data = categoryModels;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                result.IsSuccess = false;
+                result.Code = (int)HttpStatusCode.Unauthorized;
+                result.Message = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = ex.Message;
+            }
             return result;
         }
 
@@ -155,6 +237,7 @@ namespace Services.Services.EventCategoryService
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Event category updated successfully";
                 result.Data = model;
             }
             catch (Exception ex)
@@ -205,4 +288,4 @@ namespace Services.Services.EventCategoryService
             return result;
         }
     }
-} 
+}

@@ -226,6 +226,11 @@ public partial class YUniContext : DbContext
             entity.Property(e => e.Description)
                 .HasColumnType("text")
                 .HasColumnName("description");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+
+            entity.HasOne(d => d.User).WithMany(p => p.EventCategories)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_EventCategories_Users");
         });
 
         modelBuilder.Entity<Expense>(entity =>
@@ -625,6 +630,11 @@ public partial class YUniContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("subjectName");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Subjects)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Subjects_Users");
         });
 
         modelBuilder.Entity<User>(entity =>

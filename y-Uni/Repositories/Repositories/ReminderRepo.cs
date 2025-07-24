@@ -38,5 +38,15 @@ namespace Repositories.Repositories
 		{
 			return await _context.Reminders.Where(r => r.NotificationChannel == notificationChannel).ToListAsync();
 		}
+
+		public async Task<List<Reminder>> GetDueRemindersAsync(DateTime currentTime)
+		{
+			return await _context.Reminders
+				.Where(r => r.Status == "pending" && r.ReminderTime <= currentTime)
+				.Include(r => r.Assignment)
+				.Include(r => r.Event)
+				.Include(r => r.User)
+				.ToListAsync();
+		}
 	}
 }

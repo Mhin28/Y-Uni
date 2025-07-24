@@ -12,5 +12,8 @@ namespace Repositories.Repositories
         Task<List<Assignment>> GetAssignmentsBySubjectAsync(Guid subjectId);
         Task<List<Assignment>> GetUpcomingAssignmentsByUserIdAsync(Guid userId, DateTime dueDate);
         Task<List<Assignment>> GetAssignmentsByStatusAsync(Guid userId, string status);
+        Task<Assignment> GetByIdWithIncludesAsync(Guid id);
+        Task<bool> CheckSubjectExistsAsync(Guid subjectId);
+        Task<List<Assignment>> GetAssignmentsDueInRangeAsync(Guid userId, DateTime startDate, DateTime endDate);
     }
 }

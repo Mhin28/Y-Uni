@@ -14,7 +14,7 @@ namespace Services.Services.AssignmentService
         Task<ResultModel> GetBySubjectAsync(Guid subjectId);
         Task<ResultModel> GetUpcomingByUserIdAsync(Guid userId, DateTime? dueDate = null);
         Task<ResultModel> GetByStatusAsync(Guid userId, string status);
-        Task<ResultModel> AddAsync(PostAssignmentModel model);
+        Task<ResultModel> AddAsync(PostAssignmentModel model, Guid userId);
         Task<ResultModel> UpdateAsync(AssignmentModel model);
         Task<ResultModel> UpdateStatusAsync(Guid id, string status);
         Task<ResultModel> CompleteAssignmentAsync(Guid id);

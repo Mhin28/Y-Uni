@@ -39,5 +39,21 @@ namespace Repositories.Repositories
                 .OrderBy(e => e.StartDateTime)
                 .ToListAsync();
         }
+
+        public async Task<bool> CheckCategoryExistsAsync(Guid categoryId)
+        {
+            return await _context.EventCategories.AnyAsync(c => c.EvCategoryId == categoryId);
+        }
+
+        public async Task<List<Event>> GetEventsInRangeAsync(Guid userId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Events
+                .Where(e => e.UserId == userId && 
+                           e.StartDateTime >= startDate && 
+                           e.EndDateTime <= endDate)
+                .Include(e => e.EvCategory)
+                .OrderBy(e => e.StartDateTime)
+                .ToListAsync();
+        }
     }
 } 

@@ -36,6 +36,8 @@ namespace Repositories
             services.AddScoped<IReminderTemplateRepo, ReminderTemplateRepo>();
 			services.AddScoped<IReminderRepo, ReminderRepo>();
             services.AddScoped<IGoalRepo, GoalRepo>();
+            services.AddScoped<IBudgetRepo, BudgetRepo>();
+            services.AddScoped<IInvestmentRepo, InvestmentRepo>();
 
 			return services;
         }

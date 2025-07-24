@@ -78,6 +78,13 @@ scope.txt
 prd.txt
 remainingtask.txt
 taskdone.txt
+repository_pattern.txt
+service_pattern.txt
+y-Uni/API/appsettings.json
 # Firebase service account key
 Keys/
 *.json
+*.sql
+*.txt
+*.md
+*.js

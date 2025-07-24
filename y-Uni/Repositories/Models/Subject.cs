@@ -12,6 +12,9 @@ public partial class Subject
     public string SubjectName { get; set; }
 
     public string Description { get; set; }
+    public Guid UserId { get; set; } // ADD THIS LINE
+
+    public virtual User User { get; set; } // ADD THIS LINE
 
     public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 }

@@ -30,5 +30,19 @@ namespace Repositories.Repositories
             return await _context.Assignments
                 .AnyAsync(a => a.SubjectId == subjectId);
         }
+
+        public async Task<List<Subject>> GetSubjectsByUserIdAsync(Guid userId)
+        {
+            return await _context.Subjects
+                .Where(s => s.UserId == userId)
+                .OrderBy(s => s.SubjectName)
+                .ToListAsync();
+        }
+
+        public async Task<bool> SubjectNameExistsForUserAsync(string subjectName, Guid userId)
+        {
+            return await _context.Subjects
+                .AnyAsync(s => s.SubjectName.ToLower() == subjectName.ToLower() && s.UserId == userId);
+        }
     }
-} 
+}
