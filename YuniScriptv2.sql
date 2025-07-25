@@ -78,6 +78,7 @@ GO
 CREATE TABLE ExpensesCategories (
     exCId UNIQUEIDENTIFIER PRIMARY KEY,
     categoryName VARCHAR(255) NOT NULL UNIQUE,
+    type VARCHAR(10) NOT NULL CHECK (type IN ('income', 'expense')),
     description TEXT
 );
 GO
@@ -88,9 +89,6 @@ CREATE TABLE Expenses (
     amount DECIMAL(15,2) NOT NULL CHECK (amount > 0),
     description TEXT,
     createdDate DATETIME DEFAULT GETDATE(),
-    type VARCHAR(10) NOT NULL CHECK (type IN ('income', 'expense')),
-    frequency VARCHAR(10) DEFAULT 'once' CHECK (frequency IN ('once', 'daily', 'weekly', 'monthly')),
-    nextDueDate DATE,
     exCId UNIQUEIDENTIFIER,
     accountId UNIQUEIDENTIFIER,
     userId UNIQUEIDENTIFIER,
