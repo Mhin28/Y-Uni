@@ -23,7 +23,7 @@ namespace Services.Services.ExpensesCategoryService
 			var result = new ResultModel();
 			try
 			{
-				var expensesCategories = await _repo.GetAllAsync(ec => ec.Expenses, ec => ec.Budgets);
+				var expensesCategories = await _repo.GetAllAsync();
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = expensesCategories;

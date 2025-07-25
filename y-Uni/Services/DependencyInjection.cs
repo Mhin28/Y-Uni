@@ -12,6 +12,7 @@ using Services.Services.EventService;
 using Services.Services.ExpensesCategoryService;
 using Services.Services.ExpenseService;
 using Services.Services.FinancialAccountService;
+using Services.Services.FinancialDashboardService;
 using Services.Services.InvoiceService;
 using Services.Services.MembershipPlanService;
 using Services.Services.PaymentGatewayService;
@@ -54,6 +55,7 @@ namespace Services
             services.AddScoped<IReminderService, ReminderService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IBudgetService, BudgetService>();
+            services.AddScoped<IFinancialDashboardService, FinancialDashboardService>();
 
             return services;
         }

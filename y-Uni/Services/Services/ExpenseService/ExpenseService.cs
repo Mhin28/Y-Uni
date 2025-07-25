@@ -2,20 +2,24 @@
 using Repositories.Repositories;
 using Repositories.ViewModels.ExpenseModel;
 using Repositories.ViewModels.ResultModels;
+using Repositories.ViewModels.FinancialDashboardModel;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Services.Services.ExpenseService
 {
 	public class ExpenseService : IExpenseService
 	{
 		private readonly IExpenseRepo _repo;
+		private readonly IExpensesCategoryRepo _categoryRepo;
 
-		public ExpenseService(IExpenseRepo repo)
+		public ExpenseService(IExpenseRepo repo, IExpensesCategoryRepo categoryRepo)
 		{
 			_repo = repo;
+			_categoryRepo = categoryRepo;
 		}
 
 		public async Task<ResultModel> GetAllAsync()
@@ -23,7 +27,7 @@ namespace Services.Services.ExpenseService
 			var result = new ResultModel();
 			try
 			{
-				var expenses = await _repo.GetAllAsync(e => e.Account, e => e.ExC, e => e.User);
+				var expenses = await _repo.GetAllAsync();
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = expenses;
@@ -180,6 +184,47 @@ namespace Services.Services.ExpenseService
 				result.Message = ex.Message;
 			}
 
+			return result;
+		}
+
+		public async Task<ResultModel> GetRecentTransactionsAsync(Guid userId)
+		{
+			var result = new ResultModel();
+			try
+			{
+				var currentDate = DateTime.Now;
+				var expenses = await _repo.GetUserExpensesForMonthAsync(userId, currentDate.Year, currentDate.Month);
+				var categories = await _categoryRepo.GetAllAsync();
+
+				// Get only expense transactions (filter out income)
+				var transactions = expenses
+					.Where(e => e.ExC != null && e.ExC.Type == "expense")
+					.Select(e =>
+					{
+						var category = categories.FirstOrDefault(c => c.ExCid == e.ExCid);
+						return new RecentTransactionDto
+						{
+							ExpenseId = e.ExpensesId,
+							Amount = e.Amount,
+							Description = e.Description ?? "",
+							CreatedDate = e.CreatedDate ?? DateTime.Now,
+							CategoryId = e.ExCid ?? Guid.Empty,
+							CategoryName = category?.CategoryName ?? "Unknown",
+							UserId = e.UserId,
+							AccountId = e.AccountId ?? Guid.Empty,
+						};
+					}).ToList();
+
+				result.IsSuccess = true;
+				result.Code = (int)HttpStatusCode.OK;
+				result.Data = transactions;
+			}
+			catch (Exception ex)
+			{
+				result.IsSuccess = false;
+				result.Code = (int)HttpStatusCode.InternalServerError;
+				result.Message = ex.Message;
+			}
 			return result;
 		}
 	}
