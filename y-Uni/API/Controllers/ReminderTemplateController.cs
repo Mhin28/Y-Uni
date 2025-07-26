@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.ReminderTemplateModel;
 using Services.Services.ReminderTemplateService;
 using System;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class ReminderTemplateController : ControllerBase
 	{
 		private readonly IReminderTemplateService _templateService;

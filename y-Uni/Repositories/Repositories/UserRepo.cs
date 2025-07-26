@@ -38,22 +38,20 @@ namespace Repositories.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
-        
+
         public async Task<User> UpdateAsync(User user)
         {
             var existingUser = await _context.Users.FindAsync(user.UserId);
             if (existingUser == null)
                 return null;
-                
-            existingUser.FullName = user.FullName;
-            existingUser.Email = user.Email;
-            existingUser.DoB = user.DoB;
+
             existingUser.UpdatedAt = DateTime.UtcNow;
-            
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
+            _context.Entry(existingUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return existingUser;
         }
-        
+
         public async Task<User?> GetByIdAsync(Guid userId)
         {
             return await _context.Users

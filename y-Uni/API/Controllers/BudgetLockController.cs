@@ -1,12 +1,18 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.BudgetModel;
 using Services.Services.BudgetService;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
     [Route("api/budget-lock")]
     [ApiController]
+    [Authorize]
     public class BudgetLockController : ControllerBase
     {
         private readonly IBudgetService _budgetService;
@@ -34,7 +40,8 @@ namespace API.Controllers
             int toYear, 
             int toMonth)
         {
-            var result = await _budgetService.GetBudgetCarryOverSummaryAsync(userId, fromYear, fromMonth, toYear, toMonth);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var result = await _budgetService.GetBudgetCarryOverSummaryAsync(token, userId, fromYear, fromMonth, toYear, toMonth);
             return StatusCode(result.Code, result);
         }
 
@@ -47,7 +54,9 @@ namespace API.Controllers
         [HttpPost("copy-budgets")]
         public async Task<IActionResult> CopyBudgetsToNextMonth([FromBody] BudgetCarryOverRequestDto request)
         {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var result = await _budgetService.CopyBudgetsToNextMonthAsync(
+                token,
                 request.UserId, 
                 request.BudgetIds, 
                 request.TargetYear, 
@@ -71,7 +80,8 @@ namespace API.Controllers
             int targetYear, 
             int targetMonth)
         {
-            var result = await _budgetService.CreateBudgetFromPreviousMonthAsync(userId, previousBudgetId, targetYear, targetMonth);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var result = await _budgetService.CreateBudgetFromPreviousMonthAsync(token, userId, previousBudgetId, targetYear, targetMonth);
             return StatusCode(result.Code, result);
         }
 
@@ -86,7 +96,8 @@ namespace API.Controllers
         [HttpGet("budgets/{userId}/{year}/{month}")]
         public async Task<IActionResult> GetUserBudgetsForMonth(Guid userId, int year, int month)
         {
-            var result = await _budgetService.GetUserBudgetsForMonthAsync(userId, year, month);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var result = await _budgetService.GetUserBudgetsForMonthAsync(token, userId, year, month);
             return StatusCode(result.Code, result);
         }
 
@@ -108,8 +119,10 @@ namespace API.Controllers
             int toYear, 
             int toMonth)
         {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            
             // First get all budgets from source month
-            var sourceBudgetsResult = await _budgetService.GetUserBudgetsForMonthAsync(userId, fromYear, fromMonth);
+            var sourceBudgetsResult = await _budgetService.GetUserBudgetsForMonthAsync(token, userId, fromYear, fromMonth);
             
             if (!sourceBudgetsResult.IsSuccess)
             {
@@ -125,7 +138,7 @@ namespace API.Controllers
             var budgetIds = sourceBudgets.Select(b => b.BudgetId).ToList();
             
             // Copy all budgets to target month
-            var result = await _budgetService.CopyBudgetsToNextMonthAsync(userId, budgetIds, toYear, toMonth);
+            var result = await _budgetService.CopyBudgetsToNextMonthAsync(token, userId, budgetIds, toYear, toMonth);
             return StatusCode(result.Code, result);
         }
     }

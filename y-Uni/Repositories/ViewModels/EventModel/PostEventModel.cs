@@ -18,6 +18,6 @@ namespace Repositories.ViewModels.EventModel
         
         public Guid? EvCategoryId { get; set; }
         
-        public Guid? UserId { get; set; }
+        // UserId removed - will be extracted from JWT token
     }
 } 

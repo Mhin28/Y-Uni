@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.UserModel;
 using Services.Services.UserService;
+using System.Net;
+using System.Net.Mail;
 
 namespace API.Controllers
 {
@@ -34,19 +36,13 @@ namespace API.Controllers
             var result = await _userService.GetUserByIdAsync(id);
             return StatusCode(result.Code, result);
         }
-        
-        // PUT: api/User/{id}
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserModel model)
+
+        [HttpPut("update-account")]
+        public async Task<IActionResult> UpdateAccount([FromBody] UpdateUserModel model)
         {
-            // Ensure the ID in the route matches the ID in the model
-            if (model.UserId != id)
-            {
-                model.UserId = id;
-            }
-            
-            var result = await _userService.UpdateUserAsync(id, model);
-            return StatusCode(result.Code, result);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _userService.UpdateAccountLogin(token, model);
+            return StatusCode(res.Code, res);
         }
         [HttpPost("verify")]
         [AllowAnonymous]
@@ -61,6 +57,152 @@ namespace API.Controllers
         {
             var result = await _userService.ResendVerificationCodeAsync(model.Email);
             return StatusCode(result.Code, result);
+        }
+        [HttpGet("logged-in-user")]
+        public async Task<IActionResult> GetLoggedInUser()
+        {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _userService.GetLoggedInUser(token);
+            return StatusCode(res.Code, res);
+        }
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _userService.ChangePassword(token, model);
+            return StatusCode(res.Code, res);
+        }
+
+        [HttpPost("test-smtp")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestSMTP()
+        {
+            try
+            {
+                Console.WriteLine("🧪 Starting SMTP test...");
+
+                var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new System.Net.NetworkCredential("yunibuddy18@gmail.com", "pjue wfbe qsfe mwhp"),
+                    EnableSsl = true,
+                    Timeout = 30000,
+                    UseDefaultCredentials = false
+                };
+
+                Console.WriteLine("📧 SMTP client configured");
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("yunibuddy18@gmail.com", "Y-Uni Test"),
+                    Subject = "SMTP Test - " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Body = @"
+                <h2>SMTP Test Email</h2>
+                <p>This is a direct SMTP test from Y-Uni API.</p>
+                <p><strong>Sent at:</strong> " + DateTime.Now + @"</p>
+                <p><strong>Server time:</strong> " + DateTime.UtcNow + @" UTC</p>
+                <p>If you receive this email, the SMTP configuration is working correctly!</p>
+            ",
+                    IsBodyHtml = true,
+                };
+
+                mailMessage.To.Add("thiennhse184989@fpt.edu.vn");
+
+                Console.WriteLine($"📧 Sending test email to: thiennhse184989@fpt.edu.vn");
+                Console.WriteLine($"📧 Subject: {mailMessage.Subject}");
+
+                await smtpClient.SendMailAsync(mailMessage);
+
+                Console.WriteLine("✅ SMTP test email sent successfully!");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "SMTP test email sent successfully",
+                    sentTo = "thiennhse184989@fpt.edu.vn",
+                    sentAt = DateTime.Now,
+                    serverTime = DateTime.UtcNow
+                });
+            }
+            catch (SmtpException smtpEx)
+            {
+                Console.WriteLine($"❌ SMTP Exception: {smtpEx.Message}");
+                Console.WriteLine($"❌ SMTP Status Code: {smtpEx.StatusCode}");
+                Console.WriteLine($"❌ Inner Exception: {smtpEx.InnerException?.Message}");
+
+                return BadRequest(new
+                {
+                    success = false,
+                    error = "SMTP Error",
+                    message = smtpEx.Message,
+                    statusCode = smtpEx.StatusCode.ToString(),
+                    innerError = smtpEx.InnerException?.Message,
+                    type = "SmtpException"
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ General Exception: {ex.Message}");
+                Console.WriteLine($"❌ Exception Type: {ex.GetType().Name}");
+                Console.WriteLine($"❌ Stack Trace: {ex.StackTrace}");
+
+                return BadRequest(new
+                {
+                    success = false,
+                    error = "General Error",
+                    message = ex.Message,
+                    type = ex.GetType().Name,
+                    innerError = ex.InnerException?.Message
+                });
+            }
+        }
+
+        // Alternative test with different SMTP settings
+        [HttpPost("test-smtp-alternative")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestSMTPAlternative()
+        {
+            try
+            {
+                // Try with port 465 (SSL instead of TLS)
+                var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 465,
+                    Credentials = new NetworkCredential("yunibuddy18@gmail.com", "pjue wfbe qsfe mwhp"),
+                    EnableSsl = true,
+                    Timeout = 30000,
+                    UseDefaultCredentials = false
+                };
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("yunibuddy18@gmail.com"),
+                    Subject = "Alternative SMTP Test - " + DateTime.Now,
+                    Body = "Alternative SMTP test using port 465",
+                    IsBodyHtml = false,
+                };
+
+                mailMessage.To.Add("thiennhse184989@fpt.edu.vn");
+
+                await smtpClient.SendMailAsync(mailMessage);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Alternative SMTP test successful (port 465)",
+                    port = 465
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = ex.Message,
+                    port = 465,
+                    type = ex.GetType().Name
+                });
+            }
         }
     }
 }

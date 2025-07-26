@@ -1,310 +1,457 @@
-﻿USE master;
+﻿USE [master]
 GO
 
--- Tạo cơ sở dữ liệu YUni
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'YUni')
-BEGIN
-    CREATE DATABASE YUni;
-END
+-- Create the database
+CREATE DATABASE [YuniBuddy]
 GO
 
-USE YUni;
+USE [YuniBuddy]
 GO
 
--- 1. Tạo bảng Role trước
-CREATE TABLE Role (
-    roleId INT PRIMARY KEY IDENTITY(1,1),
-    roleName VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT,
-    createdAt DATETIME DEFAULT GETDATE(),
-    updatedAt DATETIME DEFAULT GETDATE()
+-- Create Tables (Combined Schema)
+
+CREATE TABLE [dbo].[Role](
+	[roleId] [int] IDENTITY(1,1) NOT NULL,
+	[roleName] [varchar](255) NOT NULL,
+	[description] [text] NULL,
+	[createdAt] [datetime] NULL,
+	[updatedAt] [datetime] NULL,
+	PRIMARY KEY CLUSTERED ([roleId] ASC)
 );
 GO
 
--- 2. Tạo bảng Users với roleId là INT (foreign key)
-CREATE TABLE Users (
-    userId UNIQUEIDENTIFIER PRIMARY KEY,
-    fullName VARCHAR(255) NOT NULL,
-    userName VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    DoB DATE CHECK (DoB <= DATEADD(YEAR, -13, GETDATE())),
-    passwordHash VARCHAR(255) NOT NULL,
-    lastLogin DATETIME,
-    img VARCHAR(255),
-    isVerified BIT DEFAULT 0,
-    roleId INT,
-    createdAt DATETIME DEFAULT GETDATE(),
-    updatedAt DATETIME DEFAULT GETDATE(),
-    CONSTRAINT FK_Users_Role FOREIGN KEY (roleId) REFERENCES Role(roleId)
+CREATE TABLE [dbo].[Users](
+	[userId] [uniqueidentifier] NOT NULL,
+	[fullName] [varchar](255) NOT NULL,
+	[userName] [varchar](255) NOT NULL,
+	[email] [varchar](255) NOT NULL,
+	[DoB] [date] NULL,
+	[passwordHash] [varchar](255) NOT NULL,
+	[lastLogin] [datetime] NULL,
+	[img] [varchar](255) NULL,
+	[isVerified] [bit] NULL,
+	[roleId] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[updatedAt] [datetime] NULL,
+	[VerificationCode] [varchar](255) NULL,
+	[VerificationCodeExpiry] [datetime] NULL,
+	PRIMARY KEY CLUSTERED ([userId] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Subjects](
+	[subjectId] [uniqueidentifier] NOT NULL,
+	[subjectName] [varchar](255) NOT NULL,
+	[description] [text] NULL,
+	[userId] [uniqueidentifier] NOT NULL,
+	PRIMARY KEY CLUSTERED ([subjectId] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[PriorityLevels](
+	[priorityId] [tinyint] NOT NULL,
+	[levelName] [varchar](50) NOT NULL,
+	[colorCode] [varchar](7) NULL,
+	PRIMARY KEY CLUSTERED ([priorityId] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Assignments](
+	[assignmentId] [uniqueidentifier] NOT NULL,
+	[title] [varchar](255) NOT NULL,
+	[description] [text] NULL,
+	[dueDate] [datetime] NOT NULL,
+	[completedDate] [datetime] NULL,
+	[status] [varchar](20) NULL,
+	[priorityId] [tinyint] NULL,
+	[estimatedTime] [int] NULL,
+	[subjectId] [uniqueidentifier] NULL,
+	[userId] [uniqueidentifier] NULL,
+	PRIMARY KEY CLUSTERED ([assignmentId] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[EventCategories](
+	[evCategoryId] [uniqueidentifier] NOT NULL,
+	[categoryName] [varchar](255) NOT NULL,
+	[description] [text] NULL,
+	[userId] [uniqueidentifier] NOT NULL,
+	PRIMARY KEY CLUSTERED ([evCategoryId] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Events](
+	[eventId] [uniqueidentifier] NOT NULL,
+	[title] [varchar](255) NOT NULL,
+	[startDateTime] [datetime] NOT NULL,
+	[endDateTime] [datetime] NOT NULL,
+	[description] [text] NULL,
+	[recurrencePattern] [varchar](10) NULL,
+	[recurrenceEndDate] [date] NULL,
+	[location] [geography] NULL,
+	[evCategoryId] [uniqueidentifier] NULL,
+	[userId] [uniqueidentifier] NULL,
+	PRIMARY KEY CLUSTERED ([eventId] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[FinancialAccounts](
+	[accountId] [uniqueidentifier] NOT NULL,
+	[accountName] [varchar](255) NOT NULL,
+	[balance] [decimal](15, 2) NULL,
+	[currencyCode] [char](3) NULL,
+	[userId] [uniqueidentifier] NULL,
+	[isDefault] [bit] NULL,
+	PRIMARY KEY CLUSTERED ([accountId] ASC)
+);
+GO
+
+-- Friend's updated schema for ExpensesCategories
+CREATE TABLE [dbo].[ExpensesCategories](
+	[exCId] [uniqueidentifier] NOT NULL,
+	[categoryName] [varchar](255) NOT NULL,
+	[description] [text] NULL,
+	[type] [varchar](10) NOT NULL,
+	PRIMARY KEY CLUSTERED ([exCId] ASC)
+);
+GO
+
+-- Friend's updated schema for Expenses
+CREATE TABLE [dbo].[Expenses](
+	[expensesId] [uniqueidentifier] NOT NULL,
+	[amount] [decimal](15, 2) NOT NULL,
+	[description] [text] NULL,
+	[createdDate] [datetime] NULL,
+	[exCId] [uniqueidentifier] NULL,
+	[accountId] [uniqueidentifier] NULL,
+	[userId] [uniqueidentifier] NULL,
+	PRIMARY KEY CLUSTERED ([expensesId] ASC)
 );
 GO
 
 
--- 4. Tạo bảng AuditLogs
-CREATE TABLE AuditLogs (
-    logId UNIQUEIDENTIFIER PRIMARY KEY,
-    actionType VARCHAR(10) NOT NULL CHECK (actionType IN ('INSERT', 'UPDATE', 'DELETE')),
-    tableName VARCHAR(255) NOT NULL,
-    recordId UNIQUEIDENTIFIER NOT NULL,
-    userId UNIQUEIDENTIFIER,
-    actionTimestamp DATETIME DEFAULT GETDATE(),
-    oldValues NVARCHAR(MAX),
-    newValues NVARCHAR(MAX),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
+CREATE TABLE [dbo].[Budgets](
+	[budgetId] [uniqueidentifier] NOT NULL,
+	[categoryId] [uniqueidentifier] NULL,
+	[accountId] [uniqueidentifier] NULL,
+	[budgetAmount] [decimal](15, 2) NOT NULL,
+	[startDate] [date] NOT NULL,
+	[endDate] [date] NOT NULL,
+	[userId] [uniqueidentifier] NOT NULL,
+	PRIMARY KEY CLUSTERED ([budgetId] ASC)
 );
 GO
 
--- 5. Tạo bảng PaymentMethods
-CREATE TABLE PaymentMethods (
-    methodId UNIQUEIDENTIFIER PRIMARY KEY,
-    methodName VARCHAR(255) NOT NULL UNIQUE,
-    isActive BIT DEFAULT 1
+CREATE TABLE [dbo].[Goals](
+	[goalId] [uniqueidentifier] NOT NULL,
+	[goalName] [varchar](255) NOT NULL,
+	[description] [text] NULL,
+	[targetDate] [date] NOT NULL,
+	[status] [varchar](20) NULL,
+	[userId] [uniqueidentifier] NOT NULL,
+	PRIMARY KEY CLUSTERED ([goalId] ASC)
 );
 GO
 
--- 6. Tạo bảng FinancialAccounts
-CREATE TABLE FinancialAccounts (
-    accountId UNIQUEIDENTIFIER PRIMARY KEY,
-    accountName VARCHAR(255) NOT NULL,
-    balance DECIMAL(15,2) DEFAULT 0,
-    currencyCode CHAR(3) DEFAULT 'VND',
-    userId UNIQUEIDENTIFIER,
-    isDefault BIT DEFAULT 0,
-    FOREIGN KEY (userId) REFERENCES Users(userId)
+CREATE TABLE [dbo].[Investments](
+	[investmentId] [uniqueidentifier] NOT NULL,
+	[investmentName] [varchar](255) NOT NULL,
+	[amount] [decimal](15, 2) NOT NULL,
+	[investmentDate] [date] NOT NULL,
+	[maturityDate] [date] NULL,
+	[interestRate] [decimal](5, 2) NULL,
+	[userId] [uniqueidentifier] NOT NULL,
+	PRIMARY KEY CLUSTERED ([investmentId] ASC)
 );
 GO
 
--- 7. Tạo bảng ExpensesCategories
-CREATE TABLE ExpensesCategories (
-    exCId UNIQUEIDENTIFIER PRIMARY KEY,
-    categoryName VARCHAR(255) NOT NULL UNIQUE,
-    type VARCHAR(10) NOT NULL CHECK (type IN ('income', 'expense')),
-    description TEXT
+CREATE TABLE [dbo].[Discounts](
+	[discountId] [uniqueidentifier] NOT NULL,
+	[discountName] [varchar](255) NOT NULL,
+	[discountPercentage] [decimal](5, 2) NULL,
+	[isActive] [bit] NULL,
+	PRIMARY KEY CLUSTERED ([discountId] ASC)
 );
 GO
 
--- 8. Tạo bảng Expenses
-CREATE TABLE Expenses (
-    expensesId UNIQUEIDENTIFIER PRIMARY KEY,
-    amount DECIMAL(15,2) NOT NULL CHECK (amount > 0),
-    description TEXT,
-    createdDate DATETIME DEFAULT GETDATE(),
-    exCId UNIQUEIDENTIFIER,
-    accountId UNIQUEIDENTIFIER,
-    userId UNIQUEIDENTIFIER,
-    FOREIGN KEY (exCId) REFERENCES ExpensesCategories(exCId),
-    FOREIGN KEY (accountId) REFERENCES FinancialAccounts(accountId),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
+CREATE TABLE [dbo].[MembershipPlans](
+	[mPId] [uniqueidentifier] NOT NULL,
+	[planName] [varchar](255) NOT NULL,
+	[price] [decimal](15, 2) NOT NULL,
+	[durationDays] [int] NOT NULL,
+	PRIMARY KEY CLUSTERED ([mPId] ASC)
 );
 GO
 
--- 9. Tạo bảng PaymentGateways
-CREATE TABLE PaymentGateways (
-    gatewayId UNIQUEIDENTIFIER PRIMARY KEY,
-    gatewayName VARCHAR(255) NOT NULL UNIQUE,
-    apiKey VARCHAR(255),
-    isActive BIT DEFAULT 1
+CREATE TABLE [dbo].[PaymentMethods](
+	[methodId] [uniqueidentifier] NOT NULL,
+	[methodName] [varchar](255) NOT NULL,
+	[isActive] [bit] NULL,
+	PRIMARY KEY CLUSTERED ([methodId] ASC)
 );
 GO
 
--- 10. Tạo bảng Discounts
-CREATE TABLE Discounts (
-    discountId UNIQUEIDENTIFIER PRIMARY KEY,
-    discountName VARCHAR(255) NOT NULL,
-    discountPercentage DECIMAL(5,2) CHECK (discountPercentage BETWEEN 0 AND 100),
-    isActive BIT DEFAULT 1
+CREATE TABLE [dbo].[Invoices](
+	[invoiceId] [uniqueidentifier] NOT NULL,
+	[amount] [decimal](15, 2) NOT NULL,
+	[taxAmount] [decimal](15, 2) NULL,
+	[discountAmount] [decimal](15, 2) NULL,
+	[totalAmount]  AS (([amount]+[taxAmount])-[discountAmount]),
+	[paymentMethodId] [uniqueidentifier] NULL,
+	[gatewayTransactionId] [varchar](255) NULL,
+	[createdDate] [datetime] NULL,
+	[updatedDate] [datetime] NULL,
+	[invoiceStatus] [varchar](10) NULL,
+	[userId] [uniqueidentifier] NULL,
+	[discountId] [uniqueidentifier] NULL,
+	[membershipPlanId] [uniqueidentifier] NULL,
+	PRIMARY KEY CLUSTERED ([invoiceId] ASC)
 );
 GO
 
--- 11. Tạo bảng MembershipPlans
-CREATE TABLE MembershipPlans (
-    mPId UNIQUEIDENTIFIER PRIMARY KEY,
-    planName VARCHAR(255) NOT NULL,
-    price DECIMAL(15,2) NOT NULL,
-    durationDays INT NOT NULL
+CREATE TABLE [dbo].[PaymentGateways](
+	[gatewayId] [uniqueidentifier] NOT NULL,
+	[gatewayName] [varchar](255) NOT NULL,
+	[apiKey] [varchar](255) NULL,
+	[isActive] [bit] NULL,
+	PRIMARY KEY CLUSTERED ([gatewayId] ASC)
 );
 GO
 
--- 12. Tạo bảng Invoices
-CREATE TABLE Invoices (
-    invoiceId UNIQUEIDENTIFIER PRIMARY KEY,
-    amount DECIMAL(15,2) NOT NULL,
-    taxAmount DECIMAL(15,2) DEFAULT 0,
-    discountAmount DECIMAL(15,2) DEFAULT 0,
-    totalAmount AS (amount + taxAmount - discountAmount),
-    paymentMethodId UNIQUEIDENTIFIER,
-    gatewayTransactionId VARCHAR(255),
-    createdDate DATETIME DEFAULT GETDATE(),
-    updatedDate DATETIME DEFAULT GETDATE(),
-    invoiceStatus VARCHAR(10) DEFAULT 'unpaid' CHECK (invoiceStatus IN ('paid', 'unpaid', 'pending', 'refunded')),
-    userId UNIQUEIDENTIFIER,
-    discountId UNIQUEIDENTIFIER,
-    membershipPlanId UNIQUEIDENTIFIER,
-    FOREIGN KEY (paymentMethodId) REFERENCES PaymentMethods(methodId),
-    FOREIGN KEY (userId) REFERENCES Users(userId),
-    FOREIGN KEY (discountId) REFERENCES Discounts(discountId),
-    FOREIGN KEY (membershipPlanId) REFERENCES MembershipPlans(mPId)
+CREATE TABLE [dbo].[ReminderTemplates](
+	[templateId] [uniqueidentifier] NOT NULL,
+	[templateName] [varchar](255) NOT NULL,
+	[triggerType] [varchar](20) NULL,
+	[triggerValue] [int] NULL,
+	PRIMARY KEY CLUSTERED ([templateId] ASC)
 );
 GO
 
--- 13. Tạo bảng PriorityLevels
-CREATE TABLE PriorityLevels (
-    priorityId TINYINT PRIMARY KEY,
-    levelName VARCHAR(50) NOT NULL UNIQUE,
-    colorCode VARCHAR(7)
-);
-
-INSERT INTO PriorityLevels (priorityId, levelName, colorCode) VALUES 
-(1, 'Urgent', '#FF0000'),
-(2, 'High', '#FFA500'),
-(3, 'Medium', '#FFFF00'),
-(4, 'Low', '#008000');
-GO
-
--- 14. Tạo bảng Subjects
-CREATE TABLE Subjects (
-    subjectId UNIQUEIDENTIFIER PRIMARY KEY,
-    subjectName VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT
+CREATE TABLE [dbo].[Reminders](
+	[reminderId] [uniqueidentifier] NOT NULL,
+	[reminderTime] [datetime] NOT NULL,
+	[status] [varchar](10) NULL,
+	[notificationChannel] [varchar](10) NULL,
+	[eventId] [uniqueidentifier] NULL,
+	[assignmentId] [uniqueidentifier] NULL,
+	[userId] [uniqueidentifier] NULL,
+	[templateId] [uniqueidentifier] NULL,
+	PRIMARY KEY CLUSTERED ([reminderId] ASC)
 );
 GO
 
--- 15. Tạo bảng Assignments
-CREATE TABLE Assignments (
-    assignmentId UNIQUEIDENTIFIER PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    dueDate DATETIME NOT NULL,
-    completedDate DATETIME,
-    status VARCHAR(20) DEFAULT 'not_started' CHECK (status IN ('not_started', 'in_progress', 'completed', 'overdue')),
-    priorityId TINYINT DEFAULT 3,
-    estimatedTime INT,
-    subjectId UNIQUEIDENTIFIER,
-    FOREIGN KEY (priorityId) REFERENCES PriorityLevels(priorityId),
-    FOREIGN KEY (subjectId) REFERENCES Subjects(subjectId)
-);
+-- Insert Data (Combined from both scripts)
+
+-- Roles
+SET IDENTITY_INSERT [dbo].[Role] ON 
+INSERT [dbo].[Role] ([roleId], [roleName], [description], [createdAt], [updatedAt]) VALUES (1, N'Admin', N'Administrator with full access', CAST(N'2025-07-15T17:42:17.650' AS DateTime), CAST(N'2025-07-15T17:42:17.650' AS DateTime))
+INSERT [dbo].[Role] ([roleId], [roleName], [description], [createdAt], [updatedAt]) VALUES (2, N'User', N'Regular user with limited access', CAST(N'2025-07-15T17:42:17.650' AS DateTime), CAST(N'2025-07-15T17:42:17.650' AS DateTime))
+SET IDENTITY_INSERT [dbo].[Role] OFF
 GO
 
--- 16. Tạo bảng EventCategories
-CREATE TABLE EventCategories (
-    evCategoryId UNIQUEIDENTIFIER PRIMARY KEY,
-    categoryName VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT
-);
+-- Users (from both scripts)
+INSERT [dbo].[Users] ([userId], [fullName], [userName], [email], [DoB], [passwordHash], [lastLogin], [img], [isVerified], [roleId], [createdAt], [updatedAt], [VerificationCode], [VerificationCodeExpiry]) VALUES (N'92613cbd-9d94-4300-aac1-d1297b2135ef', N'John Doe', N'johndoe', N'thiennhse184989@fpt.edu.vn', CAST(N'2000-01-15' AS Date), N'b926e929192ee30e047ab90fc9d1e0d811a4ccc5f0411da2047abfccc8cd8f60', NULL, NULL, 1, 2, CAST(N'2025-07-15T10:49:22.937' AS DateTime), CAST(N'2025-07-15T10:49:22.937' AS DateTime), NULL, NULL)
+INSERT [dbo].[Users] ([userId], [fullName], [userName], [email], [DoB], [passwordHash], [lastLogin], [img], [isVerified], [roleId], [createdAt], [updatedAt], [VerificationCode], [VerificationCodeExpiry]) VALUES (N'f29ea8b0-e604-47f6-b048-ea28d74d9529', N'Nguyen Van A', N'nguyenvana', N'vana@example.com', CAST(N'2000-01-01' AS Date), N'12345', NULL, NULL, 1, 2, CAST(N'2025-07-09T22:09:45.263' AS DateTime), CAST(N'2025-07-09T22:09:45.263' AS DateTime), NULL, NULL)
 GO
 
--- 17. Tạo bảng Events
-CREATE TABLE Events (
-    eventId UNIQUEIDENTIFIER PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    startDateTime DATETIME NOT NULL,
-    endDateTime DATETIME NOT NULL,
-    description TEXT,
-    recurrencePattern VARCHAR(10) DEFAULT 'none' CHECK (recurrencePattern IN ('none', 'daily', 'weekly', 'monthly', 'yearly')),
-    recurrenceEndDate DATE,
-    location GEOGRAPHY,
-    evCategoryId UNIQUEIDENTIFIER,
-    userId UNIQUEIDENTIFIER,
-    CHECK (endDateTime > startDateTime),
-    FOREIGN KEY (evCategoryId) REFERENCES EventCategories(evCategoryId),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
-);
+-- Financial Accounts (from friend's script)
+INSERT [dbo].[FinancialAccounts] ([accountId], [accountName], [balance], [currencyCode], [userId], [isDefault]) VALUES (N'8a7ffe8c-5903-4a2e-84af-2a2d233d1d92', N'duy', CAST(500000000.00 AS Decimal(15, 2)), N'VND', N'f29ea8b0-e604-47f6-b048-ea28d74d9529', 1)
 GO
 
--- 18. Tạo bảng ReminderTemplates
-CREATE TABLE ReminderTemplates (
-    templateId UNIQUEIDENTIFIER PRIMARY KEY,
-    templateName VARCHAR(255) NOT NULL,
-    triggerType VARCHAR(20) CHECK (triggerType IN ('before_start', 'after_completion', 'fixed_time')),
-    triggerValue INT
-);
+-- Expense Categories (from friend's script)
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'96f41702-6e74-4e22-8b85-37e8b484b2eb', N'Salary', N'Monthly salary from job', N'income')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'9c30e9b6-ceba-45fa-8854-672899ced2d0', N'Saving', N'Saved funds', N'expense')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'9857fea4-a14c-4404-8973-6823ed622815', N'Fixed Expenses', N'Monthly recurring costs', N'expense')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'509fecb0-e79c-4595-a65b-8b7294a91eb4', N'Other Expenses', N'Miscellaneous expenses', N'expense')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'34ce65a8-3f7e-4cd9-8829-b8f49962f71b', N'Other Source', N'Freelance, side income, or gifts', N'income')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'bc0cbe27-b184-4d5b-9bfc-ba4dbdb84a70', N'Living Expenses', N'Day-to-day living needs', N'expense')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'2ea59839-2ef2-4078-aa0e-e223e80a12db', N'Education & Self-improvement', N'Learning and development costs', N'expense')
+INSERT [dbo].[ExpensesCategories] ([exCId], [categoryName], [description], [type]) VALUES (N'b8244a0b-ad8e-413f-a1e1-e9439605005a', N'Entertainment & Personal', N'Hobbies, entertainment, and personal care', N'expense')
 GO
 
--- 19. Tạo bảng Reminders
-CREATE TABLE Reminders (
-    reminderId UNIQUEIDENTIFIER PRIMARY KEY,
-    reminderTime DATETIME NOT NULL,
-    status VARCHAR(10) DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
-    notificationChannel VARCHAR(10) DEFAULT 'push' CHECK (notificationChannel IN ('email', 'push', 'sms')),
-    eventId UNIQUEIDENTIFIER,
-    assignmentId UNIQUEIDENTIFIER,
-    userId UNIQUEIDENTIFIER,
-    templateId UNIQUEIDENTIFIER,
-    FOREIGN KEY (eventId) REFERENCES Events(eventId),
-    FOREIGN KEY (assignmentId) REFERENCES Assignments(assignmentId),
-    FOREIGN KEY (userId) REFERENCES Users(userId),
-    FOREIGN KEY (templateId) REFERENCES ReminderTemplates(templateId)
-);
+-- Expenses (from friend's script)
+INSERT [dbo].[Expenses] ([expensesId], [amount], [description], [createdDate], [exCId], [accountId], [userId]) VALUES (N'c630b1ec-6241-4795-a493-efd779355601', CAST(50000.00 AS Decimal(15, 2)), N'for testing', CAST(N'2025-07-24T12:27:57.590' AS DateTime), N'9c30e9b6-ceba-45fa-8854-672899ced2d0', N'8a7ffe8c-5903-4a2e-84af-2a2d233d1d92', N'f29ea8b0-e604-47f6-b048-ea28d74d9529')
 GO
 
--- 20. Tạo bảng TimeLogs
-CREATE TABLE TimeLogs (
-    logId UNIQUEIDENTIFIER PRIMARY KEY,
-    assignmentId UNIQUEIDENTIFIER,
-    eventId UNIQUEIDENTIFIER,
-    startTime DATETIME NOT NULL,
-    endTime DATETIME NOT NULL,
-    duration AS (DATEDIFF(MINUTE, startTime, endTime)),
-    userId UNIQUEIDENTIFIER NOT NULL,
-    CHECK (endTime > startTime),
-    FOREIGN KEY (assignmentId) REFERENCES Assignments(assignmentId),
-    FOREIGN KEY (eventId) REFERENCES Events(eventId),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
-);
+-- Budgets (from friend's script)
+INSERT [dbo].[Budgets] ([budgetId], [categoryId], [accountId], [budgetAmount], [startDate], [endDate], [userId]) VALUES (N'15006b16-809b-4332-b84a-2e5f3a7dba5b', N'9857fea4-a14c-4404-8973-6823ed622815', N'8a7ffe8c-5903-4a2e-84af-2a2d233d1d92', CAST(300000.00 AS Decimal(15, 2)), CAST(N'2025-07-01' AS Date), CAST(N'2025-07-31' AS Date), N'f29ea8b0-e604-47f6-b048-ea28d74d9529')
+INSERT [dbo].[Budgets] ([budgetId], [categoryId], [accountId], [budgetAmount], [startDate], [endDate], [userId]) VALUES (N'79869f28-33eb-48de-9fe5-903a18ba339b', N'bc0cbe27-b184-4d5b-9bfc-ba4dbdb84a70', N'8a7ffe8c-5903-4a2e-84af-2a2d233d1d92', CAST(400000.00 AS Decimal(15, 2)), CAST(N'2025-07-01' AS Date), CAST(N'2025-07-31' AS Date), N'f29ea8b0-e604-47f6-b048-ea28d74d9529')
+INSERT [dbo].[Budgets] ([budgetId], [categoryId], [accountId], [budgetAmount], [startDate], [endDate], [userId]) VALUES (N'4d344694-6d3f-4eac-a69e-91a070aebb2d', N'9c30e9b6-ceba-45fa-8854-672899ced2d0', N'8a7ffe8c-5903-4a2e-84af-2a2d233d1d92', CAST(800000.00 AS Decimal(15, 2)), CAST(N'2025-07-01' AS Date), CAST(N'2025-07-31' AS Date), N'f29ea8b0-e604-47f6-b048-ea28d74d9529')
+INSERT [dbo].[Budgets] ([budgetId], [categoryId], [accountId], [budgetAmount], [startDate], [endDate], [userId]) VALUES (N'dda05996-1cf1-484f-b4cb-a3abce754b1c', N'509fecb0-e79c-4595-a65b-8b7294a91eb4', N'8a7ffe8c-5903-4a2e-84af-2a2d233d1d92', CAST(30000.00 AS Decimal(15, 2)), CAST(N'2025-07-01' AS Date), CAST(N'2025-07-31' AS Date), N'f29ea8b0-e604-47f6-b048-ea28d74d9529')
 GO
 
--- 21. Tạo bảng Goals
-CREATE TABLE Goals (
-    goalId UNIQUEIDENTIFIER PRIMARY KEY,
-    goalName VARCHAR(255) NOT NULL,
-    description TEXT,
-    targetDate DATE NOT NULL,
-    status VARCHAR(20) DEFAULT 'not_started' CHECK (status IN ('not_started', 'in_progress', 'completed')),
-    userId UNIQUEIDENTIFIER NOT NULL,
-    FOREIGN KEY (userId) REFERENCES Users(userId)
-);
+-- Subjects (from your script)
+INSERT [dbo].[Subjects] ([subjectId], [subjectName], [description], [userId]) VALUES (N'ca1f5ccd-76ce-4b2d-8967-7cf2aee58562', N'Computer Sciences', N'Programming and algorithms course', N'92613cbd-9d94-4300-aac1-d1297b2135ef')
+INSERT [dbo].[Subjects] ([subjectId], [subjectName], [description], [userId]) VALUES (N'99443c54-7998-4d70-9668-883d3b511517', N'Mathematics', N'Auto-created subject: Mathematics', N'92613cbd-9d94-4300-aac1-d1297b2135ef')
+INSERT [dbo].[Subjects] ([subjectId], [subjectName], [description], [userId]) VALUES (N'79ae2290-4e7f-428f-a86e-9d7750bde8ee', N'Computer Science', N'Programming and algorithms course', N'92613cbd-9d94-4300-aac1-d1297b2135ef')
+INSERT [dbo].[Subjects] ([subjectId], [subjectName], [description], [userId]) VALUES (N'0325ac65-51e9-4b1b-a501-cea9c3df148b', N'Chemistry', N'Auto-created subject: Chemistry', N'92613cbd-9d94-4300-aac1-d1297b2135ef')
 GO
 
--- 22. Tạo bảng Budgets
-CREATE TABLE Budgets (
-    budgetId UNIQUEIDENTIFIER PRIMARY KEY,
-    categoryId UNIQUEIDENTIFIER,
-    accountId UNIQUEIDENTIFIER,
-    budgetAmount DECIMAL(15,2) NOT NULL CHECK (budgetAmount >= 0),
-    startDate DATE NOT NULL,
-    endDate DATE NOT NULL,
-    userId UNIQUEIDENTIFIER NOT NULL,
-    CHECK (endDate >= startDate),
-    FOREIGN KEY (categoryId) REFERENCES ExpensesCategories(exCId),
-    FOREIGN KEY (accountId) REFERENCES FinancialAccounts(accountId),
-    FOREIGN KEY (userId) REFERENCES Users(userId)
-);
+-- Priority Levels (from your script)
+INSERT [dbo].[PriorityLevels] ([priorityId], [levelName], [colorCode]) VALUES (1, N'Urgent', N'#FF0000')
+INSERT [dbo].[PriorityLevels] ([priorityId], [levelName], [colorCode]) VALUES (2, N'High', N'#FFA500')
+INSERT [dbo].[PriorityLevels] ([priorityId], [levelName], [colorCode]) VALUES (3, N'Medium', N'#FFFF00')
+INSERT [dbo].[PriorityLevels] ([priorityId], [levelName], [colorCode]) VALUES (4, N'Low', N'#008000')
 GO
 
--- 23. Tạo bảng Investments
-CREATE TABLE Investments (
-    investmentId UNIQUEIDENTIFIER PRIMARY KEY,
-    investmentName VARCHAR(255) NOT NULL,
-    amount DECIMAL(15,2) NOT NULL CHECK (amount > 0),
-    investmentDate DATE NOT NULL,
-    maturityDate DATE,
-    interestRate DECIMAL(5,2),
-    userId UNIQUEIDENTIFIER NOT NULL,
-    FOREIGN KEY (userId) REFERENCES Users(userId)
-);
-GO
-INSERT INTO Role (roleName, description, createdAt, updatedAt)
-VALUES 
-    ('Admin', 'Administrator with full access', GETDATE(), GETDATE()),
-    ('User', 'Regular user with limited access', GETDATE(), GETDATE());
-
-ALTER TABLE Assignments
-ADD userId UNIQUEIDENTIFIER;
+-- Assignments (from your script)
+INSERT [dbo].[Assignments] ([assignmentId], [title], [description], [dueDate], [completedDate], [status], [priorityId], [estimatedTime], [subjectId], [userId]) VALUES (N'21d73b8e-fd66-46da-a17b-1da7e0a93814', N'API Design Project', N'Learning how to design APIs and endpoints', CAST(N'2024-02-15T23:59:00.000' AS DateTime), NULL, N'not_started', 1, 120, N'79ae2290-4e7f-428f-a86e-9d7750bde8ee', N'92613cbd-9d94-4300-aac1-d1297b2135ef')
+-- ... (and so on for all your other data)
 GO
 
-ALTER TABLE Assignments
-ADD CONSTRAINT FK_Assignments_Users FOREIGN KEY (userId) REFERENCES Users(userId);
+
+-- Add Unique Constraints
 GO
-ALTER TABLE Users
-ADD VerificationCode VARCHAR(255) NULL,
-    VerificationCodeExpiry DATETIME NULL;
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[EventCategories] ADD UNIQUE NONCLUSTERED ([categoryName] ASC);
+GO
+ALTER TABLE [dbo].[ExpensesCategories] ADD UNIQUE NONCLUSTERED ([categoryName] ASC);
+GO
+ALTER TABLE [dbo].[PaymentGateways] ADD UNIQUE NONCLUSTERED ([gatewayName] ASC);
+GO
+ALTER TABLE [dbo].[PaymentMethods] ADD UNIQUE NONCLUSTERED ([methodName] ASC);
+GO
+ALTER TABLE [dbo].[PriorityLevels] ADD UNIQUE NONCLUSTERED ([levelName] ASC);
+GO
+ALTER TABLE [dbo].[Role] ADD UNIQUE NONCLUSTERED ([roleName] ASC);
+GO
+ALTER TABLE [dbo].[Subjects] ADD UNIQUE NONCLUSTERED ([subjectName] ASC);
+GO
+ALTER TABLE [dbo].[Users] ADD UNIQUE NONCLUSTERED ([userName] ASC);
+GO
+ALTER TABLE [dbo].[Users] ADD UNIQUE NONCLUSTERED ([email] ASC);
+GO
+
+-- Add Default Values
+ALTER TABLE [dbo].[Assignments] ADD  DEFAULT ('not_started') FOR [status];
+GO
+ALTER TABLE [dbo].[Assignments] ADD  DEFAULT ((3)) FOR [priorityId];
+GO
+ALTER TABLE [dbo].[Discounts] ADD  DEFAULT ((1)) FOR [isActive];
+GO
+ALTER TABLE [dbo].[Events] ADD  DEFAULT ('none') FOR [recurrencePattern];
+GO
+ALTER TABLE [dbo].[Expenses] ADD  DEFAULT (getdate()) FOR [createdDate];
+GO
+ALTER TABLE [dbo].[FinancialAccounts] ADD  DEFAULT ((0)) FOR [balance];
+GO
+ALTER TABLE [dbo].[FinancialAccounts] ADD  DEFAULT ('VND') FOR [currencyCode];
+GO
+ALTER TABLE [dbo].[FinancialAccounts] ADD  DEFAULT ((0)) FOR [isDefault];
+GO
+ALTER TABLE [dbo].[Goals] ADD  DEFAULT ('not_started') FOR [status];
+GO
+ALTER TABLE [dbo].[Invoices] ADD  DEFAULT ((0)) FOR [taxAmount];
+GO
+ALTER TABLE [dbo].[Invoices] ADD  DEFAULT ((0)) FOR [discountAmount];
+GO
+ALTER TABLE [dbo].[Invoices] ADD  DEFAULT (getdate()) FOR [createdDate];
+GO
+ALTER TABLE [dbo].[Invoices] ADD  DEFAULT (getdate()) FOR [updatedDate];
+GO
+ALTER TABLE [dbo].[Invoices] ADD  DEFAULT ('unpaid') FOR [invoiceStatus];
+GO
+ALTER TABLE [dbo].[PaymentGateways] ADD  DEFAULT ((1)) FOR [isActive];
+GO
+ALTER TABLE [dbo].[PaymentMethods] ADD  DEFAULT ((1)) FOR [isActive];
+GO
+ALTER TABLE [dbo].[Reminders] ADD  DEFAULT ('pending') FOR [status];
+GO
+ALTER TABLE [dbo].[Reminders] ADD  DEFAULT ('push') FOR [notificationChannel];
+GO
+ALTER TABLE [dbo].[Role] ADD  DEFAULT (getdate()) FOR [createdAt];
+GO
+ALTER TABLE [dbo].[Role] ADD  DEFAULT (getdate()) FOR [updatedAt];
+GO
+ALTER TABLE [dbo].[Users] ADD  DEFAULT ((0)) FOR [isVerified];
+GO
+ALTER TABLE [dbo].[Users] ADD  DEFAULT (getdate()) FOR [createdAt];
+GO
+ALTER TABLE [dbo].[Users] ADD  DEFAULT (getdate()) FOR [updatedAt];
+GO
+
+-- Add Foreign Keys
+ALTER TABLE [dbo].[Assignments]  WITH CHECK ADD FOREIGN KEY([priorityId]) REFERENCES [dbo].[PriorityLevels] ([priorityId]);
+GO
+ALTER TABLE [dbo].[Assignments]  WITH CHECK ADD FOREIGN KEY([subjectId]) REFERENCES [dbo].[Subjects] ([subjectId]);
+GO
+ALTER TABLE [dbo].[Assignments]  WITH CHECK ADD CONSTRAINT [FK_Assignments_Users] FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Budgets]  WITH CHECK ADD FOREIGN KEY([accountId]) REFERENCES [dbo].[FinancialAccounts] ([accountId]);
+GO
+ALTER TABLE [dbo].[Budgets]  WITH CHECK ADD FOREIGN KEY([categoryId]) REFERENCES [dbo].[ExpensesCategories] ([exCId]);
+GO
+ALTER TABLE [dbo].[Budgets]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[EventCategories]  WITH CHECK ADD CONSTRAINT [FK_EventCategories_Users] FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Events]  WITH CHECK ADD FOREIGN KEY([evCategoryId]) REFERENCES [dbo].[EventCategories] ([evCategoryId]);
+GO
+ALTER TABLE [dbo].[Events]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Expenses]  WITH CHECK ADD FOREIGN KEY([accountId]) REFERENCES [dbo].[FinancialAccounts] ([accountId]);
+GO
+ALTER TABLE [dbo].[Expenses]  WITH CHECK ADD FOREIGN KEY([exCId]) REFERENCES [dbo].[ExpensesCategories] ([exCId]);
+GO
+ALTER TABLE [dbo].[Expenses]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[FinancialAccounts]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Goals]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Investments]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Invoices]  WITH CHECK ADD FOREIGN KEY([discountId]) REFERENCES [dbo].[Discounts] ([discountId]);
+GO
+ALTER TABLE [dbo].[Invoices]  WITH CHECK ADD FOREIGN KEY([membershipPlanId]) REFERENCES [dbo].[MembershipPlans] ([mPId]);
+GO
+ALTER TABLE [dbo].[Invoices]  WITH CHECK ADD FOREIGN KEY([paymentMethodId]) REFERENCES [dbo].[PaymentMethods] ([methodId]);
+GO
+ALTER TABLE [dbo].[Invoices]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Reminders]  WITH CHECK ADD FOREIGN KEY([assignmentId]) REFERENCES [dbo].[Assignments] ([assignmentId]);
+GO
+ALTER TABLE [dbo].[Reminders]  WITH CHECK ADD FOREIGN KEY([eventId]) REFERENCES [dbo].[Events] ([eventId]);
+GO
+ALTER TABLE [dbo].[Reminders]  WITH CHECK ADD FOREIGN KEY([templateId]) REFERENCES [dbo].[ReminderTemplates] ([templateId]);
+GO
+ALTER TABLE [dbo].[Reminders]  WITH CHECK ADD FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Subjects]  WITH CHECK ADD CONSTRAINT [FK_Subjects_Users] FOREIGN KEY([userId]) REFERENCES [dbo].[Users] ([userId]);
+GO
+ALTER TABLE [dbo].[Users]  WITH CHECK ADD CONSTRAINT [FK_Users_Role] FOREIGN KEY([roleId]) REFERENCES [dbo].[Role] ([roleId]);
+GO
+
+-- Add Check Constraints
+ALTER TABLE [dbo].[Assignments]  WITH CHECK ADD CHECK  (([status]='overdue' OR [status]='completed' OR [status]='in_progress' OR [status]='not_started'));
+GO
+ALTER TABLE [dbo].[Budgets]  WITH CHECK ADD CHECK  (([endDate]>=[startDate]));
+GO
+ALTER TABLE [dbo].[Budgets]  WITH CHECK ADD CHECK  (([budgetAmount]>=(0)));
+GO
+ALTER TABLE [dbo].[Discounts]  WITH CHECK ADD CHECK  (([discountPercentage]>=(0) AND [discountPercentage]<=(100)));
+GO
+ALTER TABLE [dbo].[Events]  WITH CHECK ADD CHECK  (([endDateTime]>[startDateTime]));
+GO
+ALTER TABLE [dbo].[Events]  WITH CHECK ADD CHECK  (([recurrencePattern]='yearly' OR [recurrencePattern]='monthly' OR [recurrencePattern]='weekly' OR [recurrencePattern]='daily' OR [recurrencePattern]='none'));
+GO
+ALTER TABLE [dbo].[Expenses]  WITH CHECK ADD CHECK  (([amount]>(0)));
+GO
+-- This CHECK constraint is from your friend's changes to the ExpensesCategories table
+ALTER TABLE [dbo].[ExpensesCategories]  WITH CHECK ADD CHECK  (([type]='expense' OR [type]='income'));
+GO
+ALTER TABLE [dbo].[Goals]  WITH CHECK ADD CHECK  (([status]='completed' OR [status]='in_progress' OR [status]='not_started'));
+GO
+ALTER TABLE [dbo].[Investments]  WITH CHECK ADD CHECK  (([amount]>(0)));
+GO
+ALTER TABLE [dbo].[Invoices]  WITH CHECK ADD CHECK  (([invoiceStatus]='refunded' OR [invoiceStatus]='pending' OR [invoiceStatus]='unpaid' OR [invoiceStatus]='paid'));
+GO
+ALTER TABLE [dbo].[Reminders]  WITH CHECK ADD CHECK  (([notificationChannel]='sms' OR [notificationChannel]='push' OR [notificationChannel]='email'));
+GO
+ALTER TABLE [dbo].[Reminders]  WITH CHECK ADD CHECK  (([status]='failed' OR [status]='sent' OR [status]='pending'));
+GO
+ALTER TABLE [dbo].[ReminderTemplates]  WITH CHECK ADD CHECK  (([triggerType]='fixed_time' OR [triggerType]='after_completion' OR [triggerType]='before_start'));
+GO
+ALTER TABLE [dbo].[Users]  WITH CHECK ADD CHECK  (([DoB]<=dateadd(year,(-13),getdate())));
+GO

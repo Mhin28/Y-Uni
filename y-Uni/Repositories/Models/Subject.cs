@@ -13,5 +13,9 @@ public partial class Subject
 
     public string Description { get; set; }
 
+    public Guid UserId { get; set; }
+
     public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
+
+    public virtual User User { get; set; }
 }

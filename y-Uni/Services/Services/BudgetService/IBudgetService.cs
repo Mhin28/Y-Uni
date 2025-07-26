@@ -7,18 +7,16 @@ using System.Threading.Tasks;
 
 namespace Services.Services.BudgetService
 {
-	public interface IBudgetService
-	{
-		Task<ResultModel> GetAllAsync();
-		Task<ResultModel> GetByIdAsync(Guid id);
-		Task<ResultModel> AddAsync(PostBudgetModel model);
-		Task<ResultModel> UpdateAsync(BudgetModel model);
-		Task<ResultModel> DeleteAsync(Guid id);
-		
-		// Budget Lock/Carry-over functionality
-		Task<ResultModel> GetUserBudgetsForMonthAsync(Guid userId, int year, int month);
-		Task<ResultModel> CopyBudgetsToNextMonthAsync(Guid userId, List<Guid> budgetIds, int targetYear, int targetMonth);
-		Task<ResultModel> CreateBudgetFromPreviousMonthAsync(Guid userId, Guid previousBudgetId, int targetYear, int targetMonth);
-		Task<ResultModel> GetBudgetCarryOverSummaryAsync(Guid userId, int fromYear, int fromMonth, int toYear, int toMonth);
-	}
-}
+    public interface IBudgetService
+    {
+        Task<ResultModel> GetAllAsync(string token);
+        Task<ResultModel> GetByIdAsync(string token, Guid id);
+        Task<ResultModel> AddAsync(string token, PostBudgetModel model);
+        Task<ResultModel> UpdateAsync(string token, BudgetModel model);
+        Task<ResultModel> DeleteAsync(string token, Guid id);
+        Task<ResultModel> GetUserBudgetsForMonthAsync(string token, Guid userId, int year, int month);
+        Task<ResultModel> CopyBudgetsToNextMonthAsync(string token, Guid userId, List<Guid> budgetIds, int targetYear, int targetMonth);
+        Task<ResultModel> CreateBudgetFromPreviousMonthAsync(string token, Guid userId, Guid previousBudgetId, int targetYear, int targetMonth);
+        Task<ResultModel> GetBudgetCarryOverSummaryAsync(string token, Guid userId, int fromYear, int fromMonth, int toYear, int toMonth);
+    }
+} 

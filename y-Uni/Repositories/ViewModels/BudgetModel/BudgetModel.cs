@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Repositories.ViewModels.BudgetModel
 {
-	public class BudgetModel
-	{
-		public Guid BudgetId { get; set; }
+    public class BudgetModel
+    {
+        public Guid BudgetId { get; set; }
 
 		public Guid? CategoryId { get; set; }
 
@@ -21,5 +21,5 @@ namespace Repositories.ViewModels.BudgetModel
 		public DateOnly? EndDate { get; set; }
 
 		public Guid? UserId { get; set; }
-	}
-}
+    }
+} 

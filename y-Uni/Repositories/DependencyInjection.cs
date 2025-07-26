@@ -20,7 +20,6 @@ namespace Repositories
 
             services.AddScoped<YUniContext>();
             services.AddScoped<IUserRepo, UserRepo>();
-            services.AddScoped<IAuditLogsRepo, AuditLogsRepo>();
             services.AddScoped<IExpensesCategoryRepo, ExpensesCategoryRepo>();
             services.AddScoped<IExpenseRepo, ExpenseRepo>();
             services.AddScoped<IPaymentMethodRepo, PaymentMethodRepo>();
@@ -36,7 +35,9 @@ namespace Repositories
             services.AddScoped<IInvoiceRepo, InvoiceRepo>();
             services.AddScoped<IReminderTemplateRepo, ReminderTemplateRepo>();
 			services.AddScoped<IReminderRepo, ReminderRepo>();
-			services.AddScoped<IBudgetRepo, BudgetRepo>();
+            services.AddScoped<IGoalRepo, GoalRepo>();
+            services.AddScoped<IBudgetRepo, BudgetRepo>();
+            services.AddScoped<IInvestmentRepo, InvestmentRepo>();
 
 			return services;
         }

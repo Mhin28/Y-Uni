@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.EventCategoryModel;
 using Services.Services.EventCategoryService;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class EventCategoryController : ControllerBase
 	{
 		private readonly IEventCategoryService _eventCategoryService;
@@ -32,6 +34,22 @@ namespace API.Controllers
 		public async Task<IActionResult> GetById(Guid id)
 		{
 			var result = await _eventCategoryService.GetByIdAsync(id);
+			return StatusCode(result.Code, result);
+		}
+
+		// GET: api/EventCategory/user/{userId}
+		[HttpGet("user/{userId:guid}")]
+		public async Task<IActionResult> GetByUserId(Guid userId)
+		{
+			var result = await _eventCategoryService.GetByUserIdAsync(userId);
+			return StatusCode(result.Code, result);
+		}
+
+		// GET: api/EventCategory/my
+		[HttpGet("my")]
+		public async Task<IActionResult> GetMyCategories()
+		{
+			var result = await _eventCategoryService.GetMyCategories();
 			return StatusCode(result.Code, result);
 		}
 

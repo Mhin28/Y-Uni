@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Services.Services.AccountService;
 using Services.Services.AssignmentService;
-using Services.Services.AuditLogService;
 using Services.Services.AuthenticateService;
 using Services.Services.BudgetService;
 using Services.Services.DiscountService;
@@ -12,6 +12,8 @@ using Services.Services.EventService;
 using Services.Services.ExpensesCategoryService;
 using Services.Services.ExpenseService;
 using Services.Services.FinancialAccountService;
+using Services.Services.GoalService;
+using Services.Services.InvestmentService;
 using Services.Services.FinancialDashboardService;
 using Services.Services.InvoiceService;
 using Services.Services.MembershipPlanService;
@@ -22,8 +24,12 @@ using Services.Services.ReminderService;
 using Services.Services.ReminderTemplateService;
 using Services.Services.SubjectService;
 using Services.Services.TokenService;
+using Services.Services.UserContextService;
 using Services.Services.UserService;
 using Services.Services.Validate;
+using Services.Services.GeminiAIService;
+using Services.Services.ContextService;
+using Services.Services.ConflictDetectionService;
 
 namespace Services
 {
@@ -41,7 +47,6 @@ namespace Services
             services.AddScoped<IExpensesCategoryService, ExpensesCategoryService>();
 			services.AddScoped<IPaymentMethodService, PaymentMethodService>();
             services.AddScoped<IFinancialAccountService, FinancialAccountService>();
-            services.AddScoped<IAuditLogsService, AuditLogsService>();
             services.AddScoped<IAssignmentService, AssignmentService>();
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IPriorityLevelService, PriorityLevelService>();
@@ -54,7 +59,18 @@ namespace Services
             services.AddScoped<IReminderTemplateService, ReminderTemplateService>();
             services.AddScoped<IReminderService, ReminderService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IGoalService, GoalService>();
+            services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IBudgetService, BudgetService>();
+            services.AddScoped<IInvestmentService, InvestmentService>();
+            
+            // AI Services
+            services.AddHttpClient();
+            services.AddScoped<IGeminiAIService, GeminiAIService>();
+            services.AddScoped<IContextService, ContextService>();
+            services.AddScoped<IConflictDetectionService, ConflictDetectionService>();
+            
+            services.AddHttpContextAccessor();
             services.AddScoped<IFinancialDashboardService, FinancialDashboardService>();
 
             return services;

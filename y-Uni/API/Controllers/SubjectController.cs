@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.SubjectModel;
 using Services.Services.SubjectService;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class SubjectController : ControllerBase
 	{
 		private readonly ISubjectService _subjectService;
@@ -32,6 +34,22 @@ namespace API.Controllers
 		public async Task<IActionResult> GetById(Guid id)
 		{
 			var result = await _subjectService.GetByIdAsync(id);
+			return StatusCode(result.Code, result);
+		}
+
+		// GET: api/Subject/user/{userId}
+		[HttpGet("user/{userId:guid}")]
+		public async Task<IActionResult> GetByUserId(Guid userId)
+		{
+			var result = await _subjectService.GetByUserIdAsync(userId);
+			return StatusCode(result.Code, result);
+		}
+
+		// GET: api/Subject/my
+		[HttpGet("my")]
+		public async Task<IActionResult> GetMySubjects()
+		{
+			var result = await _subjectService.GetMySubjects();
 			return StatusCode(result.Code, result);
 		}
 

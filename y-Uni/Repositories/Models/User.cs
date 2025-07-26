@@ -37,9 +37,9 @@ public partial class User
 
     public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
-    public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
-
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
+
+    public virtual ICollection<EventCategory> EventCategories { get; set; } = new List<EventCategory>();
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
@@ -57,5 +57,5 @@ public partial class User
 
     public virtual Role Role { get; set; }
 
-    public virtual ICollection<TimeLog> TimeLogs { get; set; } = new List<TimeLog>();
+    public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 }

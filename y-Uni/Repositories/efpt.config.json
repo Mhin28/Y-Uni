@@ -19,10 +19,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[AuditLogs]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[Budgets]",
          "ObjectType": 0
       },
@@ -92,10 +88,6 @@
       },
       {
          "Name": "[dbo].[Subjects]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[TimeLogs]",
          "ObjectType": 0
       },
       {
