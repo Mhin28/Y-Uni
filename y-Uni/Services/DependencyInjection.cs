@@ -29,6 +29,7 @@ using Services.Services.Validate;
 using Services.Services.GeminiAIService;
 using Services.Services.ContextService;
 using Services.Services.ConflictDetectionService;
+using Services.Services.PayOsService;
 
 namespace Services
 {
@@ -62,9 +63,10 @@ namespace Services
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IBudgetService, BudgetService>();
             services.AddScoped<IInvestmentService, InvestmentService>();
-            
-            // AI Services
-            services.AddHttpClient();
+            services.AddScoped<IPayOsService, PayOsService>();
+
+			// AI Services
+			services.AddHttpClient();
             services.AddScoped<IGeminiAIService, GeminiAIService>();
             services.AddScoped<IContextService, ContextService>();
             services.AddScoped<IConflictDetectionService, ConflictDetectionService>();
