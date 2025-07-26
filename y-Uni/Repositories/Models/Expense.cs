@@ -15,12 +15,6 @@ public partial class Expense
 
     public DateTime? CreatedDate { get; set; }
 
-    public string Type { get; set; }
-
-    public string Frequency { get; set; }
-
-    public DateOnly? NextDueDate { get; set; }
-
     public Guid? ExCid { get; set; }
 
     public Guid? AccountId { get; set; }

@@ -1,16 +1,18 @@
+using Repositories.Base;
 using Repositories.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Repositories.Repositories
 {
-    public interface IBudgetRepo
+    public interface IBudgetRepo : IGenericRepository<Budget>
     {
-        Task<List<Budget>> GetBudgetsByUserIdAsync(Guid userId, Guid? categoryId = null, DateOnly? from = null, DateOnly? to = null);
-        Task<Budget> GetBudgetByIdAsync(Guid budgetId);
-        Task<Budget> AddBudgetAsync(Budget budget);
-        Task<bool> UpdateBudgetAsync(Budget budget);
-        Task<bool> DeleteBudgetAsync(Budget budget);
+        Task<List<Budget>> GetUserBudgetsAsync(Guid userId);
+        Task<List<Budget>> GetActiveBudgetsForUserAsync(Guid userId, DateTime date);
+        Task<List<Budget>> GetUserBudgetsForMonthAsync(Guid userId, int year, int month);
+        Task<Budget?> GetBudgetByCategoryAsync(Guid userId, Guid categoryId);
     }
 } 

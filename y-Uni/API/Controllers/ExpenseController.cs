@@ -50,5 +50,17 @@ namespace API.Controllers
 			return StatusCode(result.Code, result);
 		}
 		#endregion
+
+		/// <summary>
+		/// Get all expense transactions for the current month for a user with category information
+		/// </summary>
+		/// <param name="userId">User ID</param>
+		/// <returns>All expense transactions for current month with category names</returns>
+		[HttpGet("recent-transactions/{userId}")]
+		public async Task<IActionResult> GetRecentTransactions(Guid userId)
+		{
+			var result = await _expenseService.GetRecentTransactionsAsync(userId);
+			return StatusCode(result.Code, result);
+		}
 	}
 }

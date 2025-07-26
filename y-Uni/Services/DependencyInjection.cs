@@ -14,6 +14,7 @@ using Services.Services.ExpenseService;
 using Services.Services.FinancialAccountService;
 using Services.Services.GoalService;
 using Services.Services.InvestmentService;
+using Services.Services.FinancialDashboardService;
 using Services.Services.InvoiceService;
 using Services.Services.MembershipPlanService;
 using Services.Services.PaymentGatewayService;
@@ -70,6 +71,7 @@ namespace Services
             services.AddScoped<IConflictDetectionService, ConflictDetectionService>();
             
             services.AddHttpContextAccessor();
+            services.AddScoped<IFinancialDashboardService, FinancialDashboardService>();
 
             return services;
         }

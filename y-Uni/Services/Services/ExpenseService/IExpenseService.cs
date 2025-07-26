@@ -14,5 +14,12 @@ namespace Services.Services.ExpenseService
 		Task<ResultModel> AddAsync(PostExpenseModel model);
 		Task<ResultModel> UpdateAsync(ExpenseModel model);
 		Task<ResultModel> DeleteAsync(Guid id);
+		
+		/// <summary>
+		/// Get all expense transactions for the current month for a user with category information
+		/// </summary>
+		/// <param name="userId">User ID</param>
+		/// <returns>All expense transactions for current month with category names</returns>
+		Task<ResultModel> GetRecentTransactionsAsync(Guid userId);
 	}
 }

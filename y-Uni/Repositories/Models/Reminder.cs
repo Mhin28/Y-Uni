@@ -2,34 +2,25 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Repositories.Models;
 
 public partial class Reminder
 {
-    [Column("reminderId")]
     public Guid ReminderId { get; set; }
 
-    [Column("reminderTime")]
     public DateTime ReminderTime { get; set; }
 
-    [Column("status")]
     public string Status { get; set; }
 
-    [Column("notificationChannel")]
     public string NotificationChannel { get; set; }
 
-    [Column("eventId")]
     public Guid? EventId { get; set; }
 
-    [Column("assignmentId")]
     public Guid? AssignmentId { get; set; }
 
-    [Column("userId")]
     public Guid? UserId { get; set; }
 
-    [Column("templateId")]
     public Guid? TemplateId { get; set; }
 
     public virtual Assignment Assignment { get; set; }

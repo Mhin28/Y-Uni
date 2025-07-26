@@ -13,6 +13,8 @@ public partial class ExpensesCategory
 
     public string Description { get; set; }
 
+    public string Type { get; set; }
+
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
     public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();

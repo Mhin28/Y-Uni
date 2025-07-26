@@ -12,9 +12,10 @@ public partial class EventCategory
     public string CategoryName { get; set; }
 
     public string Description { get; set; }
-    public Guid UserId { get; set; } // ADD THIS LINE
 
-    public virtual User User { get; set; } // ADD THIS LINE
+    public Guid UserId { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+
+    public virtual User User { get; set; }
 }

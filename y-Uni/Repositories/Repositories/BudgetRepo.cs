@@ -1,49 +1,56 @@
 using Microsoft.EntityFrameworkCore;
+using Repositories.Base;
 using Repositories.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Repositories.Repositories
 {
-    public class BudgetRepo : IBudgetRepo
+    public class BudgetRepo : GenericRepository<Budget>, IBudgetRepo
     {
-        private readonly YUniContext _context;
-        public BudgetRepo(YUniContext context)
+        public BudgetRepo(YUniContext context) : base(context) { }
+
+        public async Task<List<Budget>> GetUserBudgetsAsync(Guid userId)
         {
-            _context = context;
+            return await _context.Budgets
+                .Where(b => b.UserId == userId)
+                .Include(b => b.Category)
+                .Include(b => b.Account)
+                .ToListAsync();
         }
-        public async Task<List<Budget>> GetBudgetsByUserIdAsync(Guid userId, Guid? categoryId = null, DateOnly? from = null, DateOnly? to = null)
+
+        public async Task<List<Budget>> GetActiveBudgetsForUserAsync(Guid userId, DateTime date)
         {
-            var query = _context.Budgets.Where(b => b.UserId == userId);
-            if (categoryId.HasValue)
-                query = query.Where(b => b.CategoryId == categoryId.Value);
-            if (from.HasValue)
-                query = query.Where(b => b.StartDate >= from.Value);
-            if (to.HasValue)
-                query = query.Where(b => b.EndDate <= to.Value);
-            return await query.ToListAsync();
+            var dateOnly = DateOnly.FromDateTime(date);
+            return await _context.Budgets
+                .Where(b => b.UserId == userId &&
+                           b.StartDate <= dateOnly &&
+                           b.EndDate >= dateOnly)
+                .Include(b => b.Category)
+                .Include(b => b.Account)
+                .ToListAsync();
         }
-        public async Task<Budget> GetBudgetByIdAsync(Guid budgetId)
+
+        public async Task<List<Budget>> GetUserBudgetsForMonthAsync(Guid userId, int year, int month)
         {
-            return await _context.Budgets.FirstOrDefaultAsync(b => b.BudgetId == budgetId);
+            var startDate = new DateOnly(year, month, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+
+            return await _context.Budgets
+                .Where(b => b.UserId == userId &&
+                           ((b.StartDate <= startDate && b.EndDate >= startDate) ||
+                            (b.StartDate <= endDate && b.EndDate >= endDate) ||
+                            (b.StartDate >= startDate && b.EndDate <= endDate)))
+                .Include(b => b.Category)
+                .Include(b => b.Account)
+                .ToListAsync();
         }
-        public async Task<Budget> AddBudgetAsync(Budget budget)
+
+        public async Task<Budget?> GetBudgetByCategoryAsync(Guid userId, Guid categoryId)
         {
-            _context.Budgets.Add(budget);
-            await _context.SaveChangesAsync();
-            return budget;
-        }
-        public async Task<bool> UpdateBudgetAsync(Budget budget)
-        {
-            _context.Budgets.Update(budget);
-            return await _context.SaveChangesAsync() > 0;
-        }
-        public async Task<bool> DeleteBudgetAsync(Budget budget)
-        {
-            _context.Budgets.Remove(budget);
-            return await _context.SaveChangesAsync() > 0;
+            return await _context.Budgets
+                .Where(b => b.UserId == userId && b.CategoryId == categoryId)
+                .Include(b => b.Category)
+                .Include(b => b.Account)
+                .FirstOrDefaultAsync();
         }
     }
 } 

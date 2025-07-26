@@ -34,12 +34,12 @@ public partial class User
     public string VerificationCode { get; set; }
 
     public DateTime? VerificationCodeExpiry { get; set; }
-    public virtual ICollection<EventCategory> EventCategories { get; set; } = new List<EventCategory>();
-    public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 
     public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
+
+    public virtual ICollection<EventCategory> EventCategories { get; set; } = new List<EventCategory>();
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
@@ -56,4 +56,6 @@ public partial class User
     public virtual ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
 
     public virtual Role Role { get; set; }
+
+    public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 }
