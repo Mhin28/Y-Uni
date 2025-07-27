@@ -1,0 +1,90 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Y Uni</title>
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@@400;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 60px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 24px;
+            font-weight: 400;
+            color: #ffffff;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            animation-delay: 0.3s;
+            margin: 10px 0 0;
+            letter-spacing: 1px;
+        }
+
+        @@keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            h1 {
+                font-size: 40px;
+            }
+
+            p {
+                font-size: 18px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Y-Uni</h1>
+        <p>Master Your Time, Maximize Your Wealth</p>
+    </div>
+</body>
+</html>
