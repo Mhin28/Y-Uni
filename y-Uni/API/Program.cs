@@ -14,9 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext to the DI container
 builder.Services.AddDbContext<YUniContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-    sqlOptions => sqlOptions.EnableRetryOnFailure()
-    ));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllers()
