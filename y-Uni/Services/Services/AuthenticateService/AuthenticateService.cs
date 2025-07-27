@@ -38,7 +38,7 @@ namespace Services.Services.AuthenticateService
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var userRoles = new List<string> { "User" };
+            var userRoles = new List<int> { User.RoleId ?? 0 };
 
             var claims = new List<Claim>
             {
@@ -47,7 +47,7 @@ namespace Services.Services.AuthenticateService
 
             foreach (var role in userRoles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
 
             var token = new JwtSecurityToken(
