@@ -9,14 +9,24 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Net.payOS;
+
+//Config use the environment variables for PayOS
+IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+PayOS payOS = new PayOS(configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment"),
+					configuration["Environment:PAYOS_API_KEY"] ?? throw new Exception("Cannot find environment"),
+					configuration["Environment:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Cannot find environment"));
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton(payOS);
+builder.Services.AddHttpContextAccessor();
+
+
 // Add DbContext to the DI container
 builder.Services.AddDbContext<YUniContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-    sqlOptions => sqlOptions.EnableRetryOnFailure()
-    ));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -93,7 +103,7 @@ builder.Services.AddSwaggerGen(options =>
          }
      });
 });
-
+builder.Services.AddMvc();
 var app = builder.Build();
 
 app.UseSwagger();
@@ -105,7 +115,10 @@ app.UseSwaggerUI();
 //    app.UseSwaggerUI();
 //}
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins");
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

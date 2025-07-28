@@ -87,7 +87,7 @@ namespace Services.Services.FinancialAccountService
 
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.Created;
-				result.Data = model;
+				result.Data = financialAccount;
 				result.Message = "FinancialAccount created successfully";
 			}
 			catch (Exception ex)

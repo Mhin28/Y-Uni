@@ -1,0 +1,138 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán thành công</title>
+    <link rel="stylesheet" href="~/css/style.css">
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            overflow: auto;
+        }
+
+        .main-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
+        }
+
+        .payment-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 20px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #555;
+            margin: 0 0 30px;
+        }
+
+            p a {
+                color: #6e8efb;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+                p a:hover {
+                    color: #a777e3;
+                    text-decoration: underline;
+                }
+
+        #return-page-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            #return-page-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+        @@keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .main-box {
+                padding: 30px;
+                max-width: 90%;
+            }
+
+            .payment-title {
+                font-size: 24px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            #return-page-btn {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .main-box {
+                padding: 20px;
+            }
+
+            .payment-title {
+                font-size: 20px;
+            }
+
+            p {
+                font-size: 13px;
+            }
+
+            #return-page-btn {
+                font-size: 13px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-box">
+        <h4 class="payment-title">Thanh toán thành công. Cảm ơn bạn đã sử dụng Y-Uni!</h4>
+        <p>Nếu có bất kỳ câu hỏi nào, hãy gửi email tới <a href="mailto:support@payos.vn">support@payos.vn</a></p>
+        <a href="/" id="return-page-btn">Trở về trang Tạo Link thanh toán</a>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
