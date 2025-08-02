@@ -212,7 +212,7 @@ namespace Services.Services.EventService
             return result;
         }
 
-        public async Task<ResultModel> UpdateAsync(EventModel model)
+        public async Task<ResultModel> UpdateAsync(UpdateEventModel model)
         {
             var result = new ResultModel
             {

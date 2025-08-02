@@ -212,7 +212,7 @@ namespace Services.Services.AssignmentService
             return result;
         }
 
-        public async Task<ResultModel> UpdateAsync(AssignmentModel model)
+        public async Task<ResultModel> UpdateAsync(UpdateAssignmentModel model)
         {
             var result = new ResultModel
             {

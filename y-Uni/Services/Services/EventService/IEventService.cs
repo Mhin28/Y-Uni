@@ -13,7 +13,7 @@ namespace Services.Services.EventService
         Task<ResultModel> GetUpcomingByUserIdAsync(Guid userId, DateTime startDate, DateTime endDate);
         Task<ResultModel> GetByCategoryAsync(Guid categoryId);
         Task<ResultModel> AddAsync(PostEventModel model, Guid userId);
-        Task<ResultModel> UpdateAsync(EventModel model);
+        Task<ResultModel> UpdateAsync(UpdateEventModel model);
         Task<ResultModel> DeleteAsync(Guid id);
     }
 } 
