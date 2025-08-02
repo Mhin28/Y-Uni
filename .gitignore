@@ -88,3 +88,6 @@ Keys/
 *.txt
 *.md
 *.js
+Migrations/
+PublishProfiles/
+launchSettings.json
