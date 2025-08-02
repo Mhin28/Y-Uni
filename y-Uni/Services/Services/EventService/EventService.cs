@@ -275,14 +275,23 @@ namespace Services.Services.EventService
                 if (eventEntity == null)
                 {
                     result.Message = "Event not found";
+                    result.Code = (int)HttpStatusCode.NotFound;
                     return result;
                 }
 
+                // Delete related reminders first to avoid foreign key constraint violations
+                var relatedReminders = await _reminderRepo.GetRemindersByEventIdAsync(id);
+                foreach (var reminder in relatedReminders)
+                {
+                    await _reminderRepo.RemoveAsync(reminder);
+                }
+
+                // Now delete the event
                 await _repo.RemoveAsync(eventEntity);
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
-                result.Message = "Deleted successfully";
+                result.Message = $"Event and {relatedReminders.Count()} related reminder(s) deleted successfully";
             }
             catch (Exception ex)
             {
