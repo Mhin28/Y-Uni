@@ -18,6 +18,11 @@ namespace Repositories.Repositories
 				.ToListAsync();
 		}
 
+		public async Task<List<Expense>> GetByUserIdAsync(Guid userId)
+		{
+			return await GetUserExpensesAsync(userId);
+		}
+
 		public async Task<List<Expense>> GetUserExpensesForCurrentMonthAsync(Guid userId)
 		{
 			var now = DateTime.UtcNow;

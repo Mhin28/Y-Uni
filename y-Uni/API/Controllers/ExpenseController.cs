@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.ExpenseModel;
 using Services.Services.ExpenseService;
@@ -7,6 +8,7 @@ namespace API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class ExpenseController : ControllerBase
 	{
 		private readonly IExpenseService _expenseService;
@@ -52,14 +54,13 @@ namespace API.Controllers
 		#endregion
 
 		/// <summary>
-		/// Get all expense transactions for the current month for a user with category information
+		/// Get all expense transactions for the current month for the authenticated user with category information
 		/// </summary>
-		/// <param name="userId">User ID</param>
 		/// <returns>All expense transactions for current month with category names</returns>
-		[HttpGet("recent-transactions/{userId}")]
-		public async Task<IActionResult> GetRecentTransactions(Guid userId)
+		[HttpGet("recent-transactions")]
+		public async Task<IActionResult> GetRecentTransactions()
 		{
-			var result = await _expenseService.GetRecentTransactionsAsync(userId);
+			var result = await _expenseService.GetRecentTransactionsAsync();
 			return StatusCode(result.Code, result);
 		}
 	}

@@ -14,8 +14,6 @@ namespace Repositories.ViewModels.FinancialAccountModel
 
 		public string CurrencyCode { get; set; }
 
-		public Guid? UserId { get; set; }
-
 		public bool? IsDefault { get; set; }
 	}
 }

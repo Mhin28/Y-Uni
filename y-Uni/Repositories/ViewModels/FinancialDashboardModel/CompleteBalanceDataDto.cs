@@ -11,6 +11,7 @@ namespace Repositories.ViewModels.FinancialDashboardModel
         public decimal MonthlyExpenses { get; set; }
         public decimal NetSavings { get; set; }
         public DateTime LastUpdated { get; set; }
+        public List<RecentTransactionDto> Expenses { get; set; } = new List<RecentTransactionDto>();
         public List<EnhancedBudgetDto> Budgets { get; set; } = new List<EnhancedBudgetDto>();
         public List<FinancialAccountDto> Accounts { get; set; } = new List<FinancialAccountDto>();
     }
@@ -21,6 +22,7 @@ namespace Repositories.ViewModels.FinancialDashboardModel
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public Guid AccountId { get; set; }
+        public Guid UserId { get; set; }
         public decimal BudgetAmount { get; set; }
         public decimal SpentAmount { get; set; }
         public decimal RemainingAmount { get; set; }
@@ -32,11 +34,11 @@ namespace Repositories.ViewModels.FinancialDashboardModel
 
     public class RecentTransactionDto
     {
-        public Guid ExpenseId { get; set; }
+        public Guid ExpensesId { get; set; }
         public decimal Amount { get; set; }
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public Guid? CategoryId { get; set; }
+        public Guid? ExCid { get; set; }
         public string CategoryName { get; set; }
         public Guid? UserId { get; set; }
         public Guid? AccountId { get; set; }
@@ -48,6 +50,7 @@ namespace Repositories.ViewModels.FinancialDashboardModel
         public string AccountName { get; set; }
         public decimal Balance { get; set; }
         public string CurrencyCode { get; set; }
+        public Guid UserId { get; set; }
         public bool IsDefault { get; set; }
     }
 

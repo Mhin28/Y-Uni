@@ -14,10 +14,8 @@ namespace Repositories.ViewModels.ExpenseModel
 
 		//public DateTime? CreatedDate { get; set; }
 
-		public Guid? ExCid { get; set; }
+		public Guid ExCid { get; set; }
 
-		public Guid? AccountId { get; set; }
-
-		public Guid? UserId { get; set; }
+		public Guid AccountId { get; set; }
 	}
 }

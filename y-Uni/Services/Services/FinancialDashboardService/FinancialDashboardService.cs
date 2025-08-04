@@ -2,6 +2,7 @@ using Repositories.Models;
 using Repositories.Repositories;
 using Repositories.ViewModels.FinancialDashboardModel;
 using Repositories.ViewModels.ResultModels;
+using Services.Services.UserContextService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,34 +17,41 @@ namespace Services.Services.FinancialDashboardService
         private readonly IExpenseRepo _expenseRepo;
         private readonly IFinancialAccountRepo _accountRepo;
         private readonly IExpensesCategoryRepo _categoryRepo;
+        private readonly IUserContextService _userContextService;
 
         public FinancialDashboardService(
             IBudgetRepo budgetRepo,
             IExpenseRepo expenseRepo,
             IFinancialAccountRepo accountRepo,
-            IExpensesCategoryRepo categoryRepo)
+            IExpensesCategoryRepo categoryRepo,
+            IUserContextService userContextService)
         {
             _budgetRepo = budgetRepo;
             _expenseRepo = expenseRepo;
             _accountRepo = accountRepo;
             _categoryRepo = categoryRepo;
+            _userContextService = userContextService;
         }
 
-        public async Task<ResultModel> GetCompleteBalanceDataAsync(Guid userId)
+        public async Task<ResultModel> GetCompleteBalanceDataAsync()
         {
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId() ;
                 // Get all required data sequentially to avoid DbContext threading issues
-                var accounts = await _accountRepo.GetUserAccountsAsync(userId);
+                var accounts = await _accountRepo.GetByUserIdAsync(userId);
                 var expenses = await _expenseRepo.GetUserExpensesForCurrentMonthAsync(userId);
                 var budgets = await _budgetRepo.GetActiveBudgetsForUserAsync(userId, DateTime.Now);
                 var categories = await _categoryRepo.GetAllAsync();
 
-                // Calculate available balance (same as frontend logic)
-                var availableBalance = accounts
+                // Calculate available balance minus sum of all budgets
+                var defaultAccountBalance = accounts
                     .Where(a => a.IsDefault == true)
                     .FirstOrDefault()?.Balance ?? 0;
+                
+                var totalBudgetAmount = budgets.Sum(b => b.BudgetAmount);
+                var availableBalance = defaultAccountBalance - totalBudgetAmount;
 
                 // Calculate monthly totals (enhanced logic matching frontend)
                 var monthlyIncome = expenses
@@ -53,6 +61,24 @@ namespace Services.Services.FinancialDashboardService
                 var monthlyExpenses = expenses
                     .Where(e => e.ExC != null && e.ExC.Type == "expense") // Expense transactions
                     .Sum(e => e.Amount);
+
+                var transactions = expenses
+                    .Where(e => e.ExC != null && e.ExC.Type == "expense")
+                    .Select(e =>
+                    {
+                        var category = categories.FirstOrDefault(c => c.ExCid == e.ExCid);
+                        return new RecentTransactionDto
+                        {
+                            ExpensesId = e.ExpensesId,
+                            Amount = e.Amount,
+                            Description = e.Description ?? "",
+                            CreatedDate = e.CreatedDate ?? DateTime.Now,
+                            ExCid = e.ExCid ?? Guid.Empty,
+                            CategoryName = category?.CategoryName ?? "Unknown",
+                            UserId = e.UserId,
+                            AccountId = e.AccountId ?? Guid.Empty,
+                        };
+                    }).ToList();
 
                 // Enhance budgets with spent data (critical - same as frontend logic)
                 var enhancedBudgets = await EnhanceBudgetsWithSpentData(budgets, expenses, categories, userId);
@@ -64,6 +90,7 @@ namespace Services.Services.FinancialDashboardService
                     AccountName = a.AccountName,
                     Balance = a.Balance ?? 0,
                     CurrencyCode = a.CurrencyCode ?? "VND",
+                    UserId = userId,
                     IsDefault = a.IsDefault ?? false
                 }).ToList();
 
@@ -76,6 +103,7 @@ namespace Services.Services.FinancialDashboardService
                     MonthlyExpenses = monthlyExpenses,
                     NetSavings = monthlyIncome - monthlyExpenses,
                     LastUpdated = DateTime.UtcNow,
+                    Expenses = transactions,
                     Budgets = enhancedBudgets,
                     Accounts = accountDtos
                 };
@@ -93,11 +121,12 @@ namespace Services.Services.FinancialDashboardService
             return result;
         }
 
-        public async Task<ResultModel> GetBudgetSummaryAsync(Guid userId)
+        public async Task<ResultModel> GetBudgetSummaryAsync()
         {
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var budgets = await _budgetRepo.GetUserBudgetsAsync(userId);
                 var expenses = await _expenseRepo.GetUserExpensesAsync(userId);
                 var categories = await _categoryRepo.GetAllAsync();
@@ -132,11 +161,12 @@ namespace Services.Services.FinancialDashboardService
             return result;
         }
 
-        public async Task<ResultModel> GetMonthlySummaryAsync(Guid userId, int year, int month)
+        public async Task<ResultModel> GetMonthlySummaryAsync(int year, int month)
         {
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var expenses = await _expenseRepo.GetUserExpensesForMonthAsync(userId, year, month);
                 var categories = await _categoryRepo.GetAllAsync();
                 var budgets = await _budgetRepo.GetUserBudgetsForMonthAsync(userId, year, month);
@@ -174,11 +204,11 @@ namespace Services.Services.FinancialDashboardService
                         var category = categories.FirstOrDefault(c => c.ExCid == e.ExCid);
                         return new RecentTransactionDto
                         {
-                            ExpenseId = e.ExpensesId,
+                            ExpensesId = e.ExpensesId,
                             Amount = e.Amount,
                             Description = e.Description ?? "",
                             CreatedDate = e.CreatedDate ?? DateTime.Now,
-                            CategoryId = e.ExCid ?? Guid.Empty,
+                            ExCid = e.ExCid ?? Guid.Empty,
                             CategoryName = category?.CategoryName ?? "Unknown",
                             AccountId = e.AccountId ?? Guid.Empty,
                         };
@@ -212,11 +242,12 @@ namespace Services.Services.FinancialDashboardService
 
 
 
-        public async Task<ResultModel> GetBudgetUtilizationAsync(Guid userId)
+        public async Task<ResultModel> GetBudgetUtilizationAsync()
         {
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var budgets = await _budgetRepo.GetActiveBudgetsForUserAsync(userId, DateTime.Now);
                 var expenses = await _expenseRepo.GetUserExpensesAsync(userId);
                 var categories = await _categoryRepo.GetAllAsync();
@@ -343,6 +374,7 @@ namespace Services.Services.FinancialDashboardService
                     CategoryId = budget.CategoryId ?? Guid.Empty,
                     CategoryName = category?.CategoryName ?? "Unknown",
                     AccountId = budget.AccountId ?? Guid.Empty,
+                    UserId = userId,
                     BudgetAmount = budget.BudgetAmount,
                     SpentAmount = spentAmount,
                     RemainingAmount = remainingAmount,
