@@ -9,34 +9,29 @@ namespace Services.Services.FinancialDashboardService
     public interface IFinancialDashboardService
     {
         /// <summary>
-        /// Get complete financial balance data for a user including budgets, expenses, and account information
+        /// Get complete financial balance data for the authenticated user including budgets, expenses, and account information
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <returns>Complete balance data with calculated fields</returns>
-        Task<ResultModel> GetCompleteBalanceDataAsync(Guid userId);
+        Task<ResultModel> GetCompleteBalanceDataAsync();
 
         /// <summary>
-        /// Get budget summary with spent amounts and percentages for a user
+        /// Get budget summary with spent amounts and percentages for the authenticated user
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <returns>Budget summary with calculated spent amounts</returns>
-        Task<ResultModel> GetBudgetSummaryAsync(Guid userId);
+        Task<ResultModel> GetBudgetSummaryAsync();
 
         /// <summary>
-        /// Get monthly financial summary for a specific month and year
+        /// Get monthly financial summary for a specific month and year for the authenticated user
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <param name="year">Year</param>
         /// <param name="month">Month (1-12)</param>
         /// <returns>Monthly income, expenses, and transaction summary</returns>
-        Task<ResultModel> GetMonthlySummaryAsync(Guid userId, int year, int month);
-
+        Task<ResultModel> GetMonthlySummaryAsync(int year, int month);
 
         /// <summary>
-        /// Get budget utilization data for all user budgets
+        /// Get budget utilization data for all budgets of the authenticated user
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <returns>Budget utilization with over-budget alerts</returns>
-        Task<ResultModel> GetBudgetUtilizationAsync(Guid userId);
+        Task<ResultModel> GetBudgetUtilizationAsync();
     }
 }

@@ -2,7 +2,7 @@ using Repositories.Models;
 using Repositories.Repositories;
 using Repositories.ViewModels.BudgetModel;
 using Repositories.ViewModels.ResultModels;
-using Services.Services.TokenService;
+using Services.Services.UserContextService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,24 +14,21 @@ namespace Services.Services.BudgetService
     public class BudgetService : IBudgetService
     {
         private readonly IBudgetRepo _repo;
-        private readonly ITokenService _tokenService;
+        private readonly IUserContextService _userContextService;
 
-        public BudgetService(IBudgetRepo repo, ITokenService tokenService)
+        public BudgetService(IBudgetRepo repo, IUserContextService userContextService)
         {
             _repo = repo;
-            _tokenService = tokenService;
+            _userContextService = userContextService;
         }
 
-        public async Task<ResultModel> GetAllAsync(string token)
+        public async Task<ResultModel> GetAllAsync()
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel();
             try
             {
-                var budgets = await _repo.GetAllAsync(b => b.Account, b => b.Category, b => b.User);
+                var userId = _userContextService.GetCurrentUserId();
+                var budgets = await _repo.GetByUserIdAsync(userId);
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
                 result.Data = budgets;
@@ -45,15 +42,12 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> GetByIdAsync(string token, Guid id)
+        public async Task<ResultModel> GetByIdAsync(Guid id)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var budget = await _repo.GetByIdAsync(id);
                 if (budget == null)
                 {
@@ -62,6 +56,16 @@ namespace Services.Services.BudgetService
                     result.Message = "Budget not found.";
                     return result;
                 }
+                
+                // Check if the budget belongs to the current user
+                if (budget.UserId != userId)
+                {
+                    result.IsSuccess = false;
+                    result.Code = (int)HttpStatusCode.Forbidden;
+                    result.Message = "Access denied. You can only access your own budgets.";
+                    return result;
+                }
+                
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
                 result.Data = budget;
@@ -75,12 +79,8 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> AddAsync(string token, PostBudgetModel model)
+        public async Task<ResultModel> AddAsync(PostBudgetModel model)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel
             {
                 IsSuccess = false,
@@ -90,6 +90,7 @@ namespace Services.Services.BudgetService
 
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var today = DateTime.Today;
                 var budget = new Budget
                 {
@@ -97,9 +98,9 @@ namespace Services.Services.BudgetService
                     CategoryId = model.CategoryId,
                     AccountId = model.AccountId,
                     BudgetAmount = model.BudgetAmount,
-                    StartDate = DateOnly.FromDateTime(new DateTime(today.Year, today.Month, 1)),
-                    EndDate = DateOnly.FromDateTime(new DateTime(today.Year, today.Month + 1, 1).AddDays(-1)),
-                    UserId = model.UserId
+                    StartDate = model.StartDate ?? DateOnly.FromDateTime(new DateTime(today.Year, today.Month, 1)),
+                    EndDate = model.EndDate ?? DateOnly.FromDateTime(new DateTime(today.Year, today.Month + 1, 1).AddDays(-1)),
+                    UserId = userId
                 };
                 await _repo.CreateAsync(budget);
                 result.IsSuccess = true;
@@ -115,12 +116,8 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> UpdateAsync(string token, BudgetModel model)
+        public async Task<ResultModel> UpdateAsync(BudgetModel model)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel
             {
                 IsSuccess = false,
@@ -130,10 +127,19 @@ namespace Services.Services.BudgetService
 
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var existing = await _repo.GetByIdAsync(model.BudgetId);
                 if (existing == null)
                 {
                     result.Message = "Budget not found";
+                    return result;
+                }
+                
+                // Check if the budget belongs to the current user
+                if (existing.UserId != userId)
+                {
+                    result.Code = (int)HttpStatusCode.Forbidden;
+                    result.Message = "Access denied. You can only update your own budgets.";
                     return result;
                 }
 
@@ -170,12 +176,8 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> DeleteAsync(string token, Guid id)
+        public async Task<ResultModel> DeleteAsync(Guid id)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel
             {
                 IsSuccess = false,
@@ -185,10 +187,19 @@ namespace Services.Services.BudgetService
 
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var model = await _repo.GetByIdAsync(id);
                 if (model == null)
                 {
                     result.Message = "Budget not found";
+                    return result;
+                }
+                
+                // Check if the budget belongs to the current user
+                if (model.UserId != userId)
+                {
+                    result.Code = (int)HttpStatusCode.Forbidden;
+                    result.Message = "Access denied. You can only delete your own budgets.";
                     return result;
                 }
 
@@ -207,15 +218,12 @@ namespace Services.Services.BudgetService
         }
 
         // Budget Lock/Carry-over functionality implementation
-        public async Task<ResultModel> GetUserBudgetsForMonthAsync(string token, Guid userId, int year, int month)
+        public async Task<ResultModel> GetUserBudgetsForMonthAsync(int year, int month)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var budgets = await _repo.GetUserBudgetsForMonthAsync(userId, year, month);
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
@@ -230,15 +238,12 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> CopyBudgetsToNextMonthAsync(string token, Guid userId, List<Guid> budgetIds, int targetYear, int targetMonth)
+        public async Task<ResultModel> CopyBudgetsToNextMonthAsync(List<Guid> budgetIds, int targetYear, int targetMonth)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var copiedBudgets = new List<Budget>();
                 var targetStartDate = new DateOnly(targetYear, targetMonth, 1);
                 var targetEndDate = targetStartDate.AddMonths(1).AddDays(-1);
@@ -286,15 +291,12 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> CreateBudgetFromPreviousMonthAsync(string token, Guid userId, Guid previousBudgetId, int targetYear, int targetMonth)
+        public async Task<ResultModel> CreateBudgetFromPreviousMonthAsync(Guid previousBudgetId, int targetYear, int targetMonth)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var previousBudget = await _repo.GetByIdAsync(previousBudgetId);
                 if (previousBudget == null || previousBudget.UserId != userId)
                 {
@@ -347,15 +349,12 @@ namespace Services.Services.BudgetService
             return result;
         }
 
-        public async Task<ResultModel> GetBudgetCarryOverSummaryAsync(string token, Guid userId, int fromYear, int fromMonth, int toYear, int toMonth)
+        public async Task<ResultModel> GetBudgetCarryOverSummaryAsync(int fromYear, int fromMonth, int toYear, int toMonth)
         {
-            var decoded = _tokenService.decode(token);
-            if (decoded == null || string.IsNullOrEmpty(decoded.userid) || decoded.role != "2")
-                return new ResultModel { IsSuccess = false, Code = (int)HttpStatusCode.Forbidden, Message = "Access denied" };
-
             var result = new ResultModel();
             try
             {
+                var userId = _userContextService.GetCurrentUserId();
                 var fromBudgets = await _repo.GetUserBudgetsForMonthAsync(userId, fromYear, fromMonth);
                 var toBudgets = await _repo.GetUserBudgetsForMonthAsync(userId, toYear, toMonth);
 

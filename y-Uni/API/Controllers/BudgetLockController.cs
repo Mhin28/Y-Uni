@@ -23,25 +23,22 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Get budget carry-over summary between two months
+        /// Get budget carry-over summary between two months for the authenticated user
         /// Shows which budgets can be locked and carried over
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <param name="fromYear">Source year</param>
         /// <param name="fromMonth">Source month</param>
         /// <param name="toYear">Target year</param>
         /// <param name="toMonth">Target month</param>
         /// <returns>Budget carry-over summary</returns>
-        [HttpGet("summary/{userId}/{fromYear}/{fromMonth}/to/{toYear}/{toMonth}")]
+        [HttpGet("summary/{fromYear}/{fromMonth}/to/{toYear}/{toMonth}")]
         public async Task<IActionResult> GetBudgetCarryOverSummary(
-            Guid userId, 
             int fromYear, 
             int fromMonth, 
             int toYear, 
             int toMonth)
         {
-            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var result = await _budgetService.GetBudgetCarryOverSummaryAsync(token, userId, fromYear, fromMonth, toYear, toMonth);
+            var result = await _budgetService.GetBudgetCarryOverSummaryAsync(fromYear, fromMonth, toYear, toMonth);
             return StatusCode(result.Code, result);
         }
 
@@ -54,10 +51,7 @@ namespace API.Controllers
         [HttpPost("copy-budgets")]
         public async Task<IActionResult> CopyBudgetsToNextMonth([FromBody] BudgetCarryOverRequestDto request)
         {
-            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var result = await _budgetService.CopyBudgetsToNextMonthAsync(
-                token,
-                request.UserId, 
                 request.BudgetIds, 
                 request.TargetYear, 
                 request.TargetMonth);
@@ -65,64 +59,55 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Lock a single budget from previous month
+        /// Lock a single budget from previous month for the authenticated user
         /// Creates new budget with same amount for target month
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <param name="previousBudgetId">Budget ID to copy from</param>
         /// <param name="targetYear">Target year</param>
         /// <param name="targetMonth">Target month</param>
         /// <returns>Created budget</returns>
-        [HttpPost("lock-budget/{userId}/{previousBudgetId}/to/{targetYear}/{targetMonth}")]
+        [HttpPost("lock-budget/{previousBudgetId}/to/{targetYear}/{targetMonth}")]
         public async Task<IActionResult> LockBudgetFromPreviousMonth(
-            Guid userId, 
             Guid previousBudgetId, 
             int targetYear, 
             int targetMonth)
         {
-            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var result = await _budgetService.CreateBudgetFromPreviousMonthAsync(token, userId, previousBudgetId, targetYear, targetMonth);
+            var result = await _budgetService.CreateBudgetFromPreviousMonthAsync(previousBudgetId, targetYear, targetMonth);
             return StatusCode(result.Code, result);
         }
 
         /// <summary>
-        /// Get user budgets for a specific month
+        /// Get budgets for a specific month for the authenticated user
         /// Useful for frontend to show available budgets for locking
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <param name="year">Year</param>
         /// <param name="month">Month</param>
         /// <returns>List of budgets for the specified month</returns>
-        [HttpGet("budgets/{userId}/{year}/{month}")]
-        public async Task<IActionResult> GetUserBudgetsForMonth(Guid userId, int year, int month)
+        [HttpGet("budgets/{year}/{month}")]
+        public async Task<IActionResult> GetUserBudgetsForMonth(int year, int month)
         {
-            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var result = await _budgetService.GetUserBudgetsForMonthAsync(token, userId, year, month);
+            var result = await _budgetService.GetUserBudgetsForMonthAsync(year, month);
             return StatusCode(result.Code, result);
         }
 
         /// <summary>
-        /// Quick lock all budgets from previous month
+        /// Quick lock all budgets from previous month for the authenticated user
         /// Convenience endpoint for "lock all" functionality
         /// </summary>
-        /// <param name="userId">User ID</param>
         /// <param name="fromYear">Source year</param>
         /// <param name="fromMonth">Source month</param>
         /// <param name="toYear">Target year</param>
         /// <param name="toMonth">Target month</param>
         /// <returns>Result of bulk lock operation</returns>
-        [HttpPost("lock-all/{userId}/{fromYear}/{fromMonth}/to/{toYear}/{toMonth}")]
+        [HttpPost("lock-all/{fromYear}/{fromMonth}/to/{toYear}/{toMonth}")]
         public async Task<IActionResult> LockAllBudgetsFromPreviousMonth(
-            Guid userId, 
             int fromYear, 
             int fromMonth, 
             int toYear, 
             int toMonth)
         {
-            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            
             // First get all budgets from source month
-            var sourceBudgetsResult = await _budgetService.GetUserBudgetsForMonthAsync(token, userId, fromYear, fromMonth);
+            var sourceBudgetsResult = await _budgetService.GetUserBudgetsForMonthAsync(fromYear, fromMonth);
             
             if (!sourceBudgetsResult.IsSuccess)
             {
@@ -138,7 +123,7 @@ namespace API.Controllers
             var budgetIds = sourceBudgets.Select(b => b.BudgetId).ToList();
             
             // Copy all budgets to target month
-            var result = await _budgetService.CopyBudgetsToNextMonthAsync(token, userId, budgetIds, toYear, toMonth);
+            var result = await _budgetService.CopyBudgetsToNextMonthAsync(budgetIds, toYear, toMonth);
             return StatusCode(result.Code, result);
         }
     }

@@ -39,7 +39,6 @@ namespace Repositories.ViewModels.BudgetModel
     /// </summary>
     public class BudgetCarryOverRequestDto
     {
-        public Guid UserId { get; set; }
         public List<Guid> BudgetIds { get; set; } = new List<Guid>();
         public int TargetYear { get; set; }
         public int TargetMonth { get; set; }

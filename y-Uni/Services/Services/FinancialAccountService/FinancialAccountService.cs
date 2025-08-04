@@ -3,6 +3,7 @@ using Repositories.Models;
 using Repositories.Repositories;
 using Repositories.ViewModels.FinancialAccountModel;
 using Repositories.ViewModels.ResultModels;
+using Services.Services.UserContextService;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -12,10 +13,12 @@ namespace Services.Services.FinancialAccountService
 	public class FinancialAccountService : IFinancialAccountService
 	{
 		private readonly IFinancialAccountRepo _repo;
+		private readonly IUserContextService _userContextService;
 
-		public FinancialAccountService(IFinancialAccountRepo repo)
+		public FinancialAccountService(IFinancialAccountRepo repo, IUserContextService userContextService)
 		{
 			_repo = repo;
+			_userContextService = userContextService;
 		}
 
 		public async Task<ResultModel> GetAllAsync()
@@ -23,7 +26,8 @@ namespace Services.Services.FinancialAccountService
 			var result = new ResultModel();
 			try
 			{
-				var accounts = await _repo.GetAllAsync(fa => fa.User, fa => fa.Budgets, fa => fa.Expenses);
+				var userId = _userContextService.GetCurrentUserId();
+				var accounts = await _repo.GetByUserIdAsync(userId);
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = accounts;
@@ -42,6 +46,7 @@ namespace Services.Services.FinancialAccountService
 			var result = new ResultModel();
 			try
 			{
+				var userId = _userContextService.GetCurrentUserId();
 				var account = await _repo.GetByIdAsync(id);
 				if (account == null)
 				{
@@ -50,6 +55,16 @@ namespace Services.Services.FinancialAccountService
 					result.Message = "FinancialAccount not found.";
 					return result;
 				}
+				
+				// Check if the account belongs to the current user
+				if (account.UserId != userId)
+				{
+					result.IsSuccess = false;
+					result.Code = (int)HttpStatusCode.Forbidden;
+					result.Message = "Access denied. You can only access your own financial accounts.";
+					return result;
+				}
+				
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = account;
@@ -74,13 +89,14 @@ namespace Services.Services.FinancialAccountService
 
 			try
 			{
+				var userId = _userContextService.GetCurrentUserId();
 				var financialAccount = new FinancialAccount
 				{
 					AccountId = Guid.NewGuid(),
 					AccountName = model.AccountName,
 					Balance = model.Balance,
 					CurrencyCode = model.CurrencyCode,
-					UserId = model.UserId,
+					UserId = userId,
 					IsDefault = model.IsDefault
 				};
 				await _repo.CreateAsync(financialAccount);
@@ -109,10 +125,19 @@ namespace Services.Services.FinancialAccountService
 
 			try
 			{
+				var userId = _userContextService.GetCurrentUserId();
 				var existing = await _repo.GetByIdAsync(model.AccountId);
 				if (existing == null)
 				{
 					result.Message = "FinancialAccount not found";
+					return result;
+				}
+				
+				// Check if the account belongs to the current user
+				if (existing.UserId != userId)
+				{
+					result.Code = (int)HttpStatusCode.Forbidden;
+					result.Message = "Access denied. You can only update your own financial accounts.";
 					return result;
 				}
 
@@ -157,10 +182,19 @@ namespace Services.Services.FinancialAccountService
 
 			try
 			{
+				var userId = _userContextService.GetCurrentUserId();
 				var model = await _repo.GetByIdAsync(id);
 				if (model == null)
 				{
 					result.Message = "FinancialAccount not found";
+					return result;
+				}
+				
+				// Check if the account belongs to the current user
+				if (model.UserId != userId)
+				{
+					result.Code = (int)HttpStatusCode.Forbidden;
+					result.Message = "Access denied. You can only delete your own financial accounts.";
 					return result;
 				}
 
@@ -183,6 +217,17 @@ namespace Services.Services.FinancialAccountService
 			var result = new ResultModel();
 			try
 			{
+				var currentUserId = _userContextService.GetCurrentUserId();
+				
+				// Only allow users to get their own accounts
+				if (userId != currentUserId)
+				{
+					result.IsSuccess = false;
+					result.Code = (int)HttpStatusCode.Forbidden;
+					result.Message = "Access denied. You can only access your own financial accounts.";
+					return result;
+				}
+				
 				var accounts = await _repo.GetByUserIdAsync(userId);
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;

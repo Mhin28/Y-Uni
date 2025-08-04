@@ -18,6 +18,13 @@ namespace Repositories.Repositories
 		Task<List<Expense>> GetUserExpensesAsync(Guid userId);
 
 		/// <summary>
+		/// Get all expenses for a specific user (alias for GetUserExpensesAsync)
+		/// </summary>
+		/// <param name="userId">User ID</param>
+		/// <returns>List of user expenses</returns>
+		Task<List<Expense>> GetByUserIdAsync(Guid userId);
+
+		/// <summary>
 		/// Get user expenses for current month
 		/// </summary>
 		/// <param name="userId">User ID</param>

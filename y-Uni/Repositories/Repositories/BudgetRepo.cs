@@ -17,6 +17,11 @@ namespace Repositories.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Budget>> GetByUserIdAsync(Guid userId)
+        {
+            return await GetUserBudgetsAsync(userId);
+        }
+
         public async Task<List<Budget>> GetActiveBudgetsForUserAsync(Guid userId, DateTime date)
         {
             var dateOnly = DateOnly.FromDateTime(date);
