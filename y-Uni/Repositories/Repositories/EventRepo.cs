@@ -17,6 +17,7 @@ namespace Repositories.Repositories
             return await _context.Events
                 .Where(e => e.UserId == userId)
                 .Include(e => e.EvCategory)
+                .Include(e => e.Reminders)
                 .OrderBy(e => e.StartDateTime)
                 .ToListAsync();
         }
@@ -28,6 +29,7 @@ namespace Repositories.Repositories
                            e.StartDateTime >= startDate && 
                            e.StartDateTime <= endDate)
                 .Include(e => e.EvCategory)
+                .Include(e => e.Reminders)
                 .OrderBy(e => e.StartDateTime)
                 .ToListAsync();
         }
@@ -36,6 +38,8 @@ namespace Repositories.Repositories
         {
             return await _context.Events
                 .Where(e => e.EvCategoryId == categoryId)
+                .Include(e => e.EvCategory)
+                .Include(e => e.Reminders)
                 .OrderBy(e => e.StartDateTime)
                 .ToListAsync();
         }
@@ -52,6 +56,7 @@ namespace Repositories.Repositories
                            e.StartDateTime >= startDate && 
                            e.EndDateTime <= endDate)
                 .Include(e => e.EvCategory)
+                .Include(e => e.Reminders)
                 .OrderBy(e => e.StartDateTime)
                 .ToListAsync();
         }

@@ -61,7 +61,7 @@ namespace API.Controllers
 
 		// PUT: api/Assignment
 		[HttpPut]
-		public async Task<IActionResult> Update([FromBody] AssignmentModel model)
+		public async Task<IActionResult> Update([FromBody] UpdateAssignmentModel model)
 		{
 			var result = await _assignmentService.UpdateAsync(model);
 			return StatusCode(result.Code, result);

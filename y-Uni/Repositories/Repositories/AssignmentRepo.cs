@@ -19,6 +19,7 @@ namespace Repositories.Repositories
                 .Where(a => a.UserId == userId)
                 .Include(a => a.Subject)
                 .Include(a => a.Priority)
+                .Include(a => a.Reminders)
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
         }
@@ -27,7 +28,9 @@ namespace Repositories.Repositories
         {
             return await _context.Assignments
                 .Where(a => a.SubjectId == subjectId)
+                .Include(a => a.Subject)
                 .Include(a => a.Priority)
+                .Include(a => a.Reminders)
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
         }
@@ -40,6 +43,7 @@ namespace Repositories.Repositories
                           (a.Status == "not_started" || a.Status == "in_progress"))
                 .Include(a => a.Subject)
                 .Include(a => a.Priority)
+                .Include(a => a.Reminders)
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
         }
@@ -50,6 +54,7 @@ namespace Repositories.Repositories
                 .Where(a => a.UserId == userId && a.Status == status)
                 .Include(a => a.Subject)
                 .Include(a => a.Priority)
+                .Include(a => a.Reminders)
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
         }
@@ -78,6 +83,7 @@ namespace Repositories.Repositories
                            a.DueDate <= endDate)
                 .Include(a => a.Subject)
                 .Include(a => a.Priority)
+                .Include(a => a.Reminders)
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
         }

@@ -61,7 +61,7 @@ namespace API.Controllers
 
 		// PUT: api/Event
 		[HttpPut]
-		public async Task<IActionResult> Update([FromBody] EventModel model)
+		public async Task<IActionResult> Update([FromBody] UpdateEventModel model)
 		{
 			var result = await _eventService.UpdateAsync(model);
 			return StatusCode(result.Code, result);

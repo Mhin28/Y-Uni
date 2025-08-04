@@ -212,7 +212,7 @@ namespace Services.Services.AssignmentService
             return result;
         }
 
-        public async Task<ResultModel> UpdateAsync(AssignmentModel model)
+        public async Task<ResultModel> UpdateAsync(UpdateAssignmentModel model)
         {
             var result = new ResultModel
             {
@@ -313,14 +313,23 @@ namespace Services.Services.AssignmentService
                 if (assignment == null)
                 {
                     result.Message = "Assignment not found";
+                    result.Code = (int)HttpStatusCode.NotFound;
                     return result;
                 }
 
+                // Delete related reminders first to avoid foreign key constraint violations
+                var relatedReminders = await _reminderRepo.GetRemindersByAssignmentIdAsync(id);
+                foreach (var reminder in relatedReminders)
+                {
+                    await _reminderRepo.RemoveAsync(reminder);
+                }
+
+                // Now delete the assignment
                 await _repo.RemoveAsync(assignment);
 
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
-                result.Message = "Deleted successfully";
+                result.Message = $"Assignment and {relatedReminders.Count()} related reminder(s) deleted successfully";
             }
             catch (Exception ex)
             {
