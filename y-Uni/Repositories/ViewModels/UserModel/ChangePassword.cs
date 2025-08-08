@@ -10,6 +10,8 @@ namespace Repositories.ViewModels.UserModel
     {
         public Guid UserId { get; set; }
         public string OldPassword { get; set; }
+        public string Email { get; set; } // Dùng cho quên mật khẩu
+        public string Code { get; set; } // Dùng cho quên mật khẩu
         public string NewPassword { get; set; }
     }
 }

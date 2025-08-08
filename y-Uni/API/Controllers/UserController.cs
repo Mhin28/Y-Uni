@@ -73,6 +73,30 @@ namespace API.Controllers
             return StatusCode(res.Code, res);
         }
 
+        [HttpPost("forgot-password/send-code")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendForgotPasswordCode([FromBody] ResendVerificationModel model)
+        {
+            var result = await _userService.SendForgotPasswordCodeAsync(model.Email);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpPost("forgot-password/reset")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPasswordWithCode([FromBody] ChangePasswordModel model)
+        {
+            var result = await _userService.ResetPasswordWithCodeAsync(model);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpPost("login-google")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginModel model)
+        {
+            var result = await _userService.LoginWithGoogleAsync(model.IdToken);
+            return StatusCode(result.Code, result);
+        }
+
         [HttpPost("test-smtp")]
         [AllowAnonymous]
         public async Task<IActionResult> TestSMTP()
@@ -157,14 +181,12 @@ namespace API.Controllers
             }
         }
 
-        // Alternative test with different SMTP settings
         [HttpPost("test-smtp-alternative")]
         [AllowAnonymous]
         public async Task<IActionResult> TestSMTPAlternative()
         {
             try
             {
-                // Try with port 465 (SSL instead of TLS)
                 var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
                     Port = 465,

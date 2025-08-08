@@ -17,5 +17,8 @@ namespace Services.Services.UserService
         Task<ResultModel> ResendVerificationCodeAsync(string email);
         Task<ResultModel> ChangePassword(string Token, ChangePasswordModel model);
         Task<ResultModel> GetLoggedInUser(string token);
+        Task<ResultModel> SendForgotPasswordCodeAsync(string email);
+        Task<ResultModel> ResetPasswordWithCodeAsync(ChangePasswordModel model);
+        Task<ResultModel> LoginWithGoogleAsync(string idToken);
     }
 }

@@ -462,5 +462,128 @@ namespace Services.Services.UserService
                 }
             };
         }
+
+        public async Task<ResultModel> SendForgotPasswordCodeAsync(string email)
+        {
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Email không tồn tại hoặc không hợp lệ."
+            };
+            var user = await _userRepo.GetByEmailAsync(email);
+            if (user == null)
+            {
+                result.Code = (int)HttpStatusCode.NotFound;
+                result.Message = "Không tìm thấy người dùng với email này.";
+                return result;
+            }
+            var code = new Random().Next(100000, 999999).ToString();
+            user.VerificationCode = code;
+            user.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(10);
+            await _userRepo.UpdateVerifyAsync(user);
+            await _emailService.SendVerificationEmailAsync(user.Email, code);
+            result.IsSuccess = true;
+            result.Code = (int)HttpStatusCode.OK;
+            result.Message = "Đã gửi mã xác nhận đến email.";
+            return result;
+        }
+
+        public async Task<ResultModel> ResetPasswordWithCodeAsync(ChangePasswordModel model)
+        {
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Mã xác nhận không hợp lệ hoặc đã hết hạn."
+            };
+            var user = await _userRepo.GetByEmailAsync(model.Email);
+            if (user == null)
+            {
+                result.Code = (int)HttpStatusCode.NotFound;
+                result.Message = "Không tìm thấy người dùng với email này.";
+                return result;
+            }
+            if (user.VerificationCode != model.Code || user.VerificationCodeExpiry < DateTime.UtcNow)
+            {
+                result.Code = (int)HttpStatusCode.BadRequest;
+                result.Message = "Mã xác nhận không hợp lệ hoặc đã hết hạn.";
+                return result;
+            }
+            user.PasswordHash = HashPass.HashPass.HashPassword(model.NewPassword);
+            user.VerificationCode = null;
+            user.VerificationCodeExpiry = null;
+            await _userRepo.UpdateVerifyAsync(user);
+            result.IsSuccess = true;
+            result.Code = (int)HttpStatusCode.OK;
+            result.Message = "Đổi mật khẩu thành công.";
+            return result;
+        }
+
+        public async Task<ResultModel> LoginWithGoogleAsync(string idToken)
+        {
+            var result = new ResultModel
+            {
+                IsSuccess = false,
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Đăng nhập Google thất bại."
+            };
+            try
+            {
+                var httpClient = new System.Net.Http.HttpClient();
+                var googleApi = $"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}";
+                var response = await httpClient.GetAsync(googleApi);
+                if (!response.IsSuccessStatusCode)
+                {
+                    result.Message = "id_token không hợp lệ.";
+                    return result;
+                }
+                var payload = await response.Content.ReadAsStringAsync();
+                var payloadObj = System.Text.Json.JsonDocument.Parse(payload).RootElement;
+                var email = payloadObj.GetProperty("email").GetString();
+                var name = payloadObj.TryGetProperty("name", out var n) ? n.GetString() : email;
+                var user = await _userRepo.GetByEmailAsync(email);
+                if (user == null)
+                {
+                    user = new Repositories.Models.User
+                    {
+                        UserId = Guid.NewGuid(),
+                        Email = email,
+                        FullName = name,
+                        UserName = email,
+                        IsVerified = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RoleId = 2 
+                    };
+                    await _userRepo.AddAsync(user);
+                }
+                var loginResModel = new Repositories.ViewModels.AutheticateModel.LoginResModel
+                {
+                    UserId = user.UserId,
+                    FullName = user.FullName,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    DoB = user.DoB,
+                    PasswordHash = user.PasswordHash,
+                    LastLogin = user.LastLogin,
+                    Img = user.Img,
+                    RoleId = user.RoleId,
+                    IsVerified = user.IsVerified,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                };
+                var token = _authentocateService.GenerateJWT(loginResModel);
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Message = "Đăng nhập Google thành công.";
+                result.Data = new { Token = token, User = user };
+            }
+            catch (Exception ex)
+            {
+                result.Message = $"Lỗi: {ex.Message}";
+            }
+            return result;
+        }
     }
 }
