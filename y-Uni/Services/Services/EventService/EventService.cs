@@ -167,19 +167,6 @@ namespace Services.Services.EventService
                     return result;
                 }
 
-                // Validate event category is required and exists
-                if (!model.EvCategoryId.HasValue)
-                {
-                    result.Message = "Event category ID is required";
-                    return result;
-                }
-
-                var categoryExists = await _repo.CheckCategoryExistsAsync(model.EvCategoryId.Value);
-                if (!categoryExists)
-                {
-                    result.Message = "Event category not found";
-                    return result;
-                }
 
                 var eventEntity = new Event
                 {
@@ -379,7 +366,7 @@ namespace Services.Services.EventService
             var current = baseEvent.StartDateTime;
             var duration = baseEvent.EndDateTime - baseEvent.StartDateTime;
             int occurrenceCount = 0;
-            const int maxOccurrences = 100; // Safety limit
+            const int maxOccurrences = 100; 
             
             while (current <= endDate && occurrenceCount < maxOccurrences)
             {

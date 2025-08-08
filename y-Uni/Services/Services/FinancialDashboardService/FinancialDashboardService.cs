@@ -174,27 +174,38 @@ namespace Services.Services.FinancialDashboardService
                 var totalIncome = expenses.Where(e => e.ExC != null && e.ExC.Type == "income").Sum(e => e.Amount);
                 var totalExpenses = expenses.Where(e => e.ExC != null && e.ExC.Type == "expense").Sum(e => e.Amount);
 
-                // Group expenses by category
-                var categoryBreakdown = expenses
-                    .Where(e => e.ExC != null && e.ExC.Type == "expense") // Only expenses, not income
+                // Use enhanced budget logic for consistent and accurate calculations
+                var enhancedBudgets = await EnhanceBudgetsWithSpentData(budgets, expenses, categories, userId);
+
+                // Add categories with expenses but no budget (create enhanced budget DTOs for consistency)
+                var categoriesWithExpensesButNoBudget = expenses
+                    .Where(e => e.ExC != null && e.ExC.Type == "expense" && 
+                               !enhancedBudgets.Any(eb => eb.CategoryId == e.ExCid))
                     .GroupBy(e => e.ExCid)
                     .Select(g =>
                     {
                         var category = categories.FirstOrDefault(c => c.ExCid == g.Key);
-                        var budget = budgets.FirstOrDefault(b => b.CategoryId == g.Key);
                         var totalAmount = g.Sum(e => e.Amount);
 
-                        return new CategorySummaryDto
+                        return new EnhancedBudgetDto
                         {
-                            CategoryId = g.Key,
+                            BudgetId = Guid.Empty, // No budget ID since no budget exists
+                            CategoryId = g.Key ?? Guid.Empty,
                             CategoryName = category?.CategoryName ?? "Unknown",
-                            TotalAmount = totalAmount,
-                            TransactionCount = g.Count(),
-                            BudgetAmount = budget?.BudgetAmount ?? 0,
-                            RemainingBudget = (budget?.BudgetAmount ?? 0) - totalAmount,
-                            IsOverBudget = totalAmount > (budget?.BudgetAmount ?? 0)
+                            AccountId = Guid.Empty,
+                            UserId = userId,
+                            BudgetAmount = 0, // No budget set for this category
+                            SpentAmount = totalAmount,
+                            RemainingAmount = -totalAmount, // Negative since no budget
+                            SpentPercentage = 0, // Can't calculate percentage without budget
+                            IsOverBudget = true, // Always over budget if no budget is set
+                            StartDate = new DateTime(year, month, 1),
+                            EndDate = new DateTime(year, month, DateTime.DaysInMonth(year, month))
                         };
                     }).ToList();
+
+                // Combine budgeted and non-budgeted categories
+                var allCategoryBudgets = enhancedBudgets.Concat(categoriesWithExpensesButNoBudget).ToList();
 
                 // Get transaction details - map expenses to transaction DTOs
                 var transactions = expenses
@@ -223,7 +234,7 @@ namespace Services.Services.FinancialDashboardService
                     TotalExpenses = totalExpenses,
                     NetAmount = totalIncome - totalExpenses,
                     TransactionCount = expenses.Count,
-                    CategoryBreakdown = categoryBreakdown,
+                    CategoryBreakdown = allCategoryBudgets.OrderByDescending(c => c.SpentAmount).ToList(),
                     Transactions = transactions
                 };
 

@@ -75,20 +75,10 @@ namespace Repositories.ViewModels.FinancialDashboardModel
         public decimal TotalExpenses { get; set; }
         public decimal NetAmount { get; set; }
         public int TransactionCount { get; set; }
-        public List<CategorySummaryDto> CategoryBreakdown { get; set; } = new List<CategorySummaryDto>();
+        public List<EnhancedBudgetDto> CategoryBreakdown { get; set; } = new List<EnhancedBudgetDto>();
         public List<RecentTransactionDto> Transactions { get; set; } = new List<RecentTransactionDto>();
     }
 
-    public class CategorySummaryDto
-    {
-        public Guid? CategoryId { get; set; }
-        public string CategoryName { get; set; }
-        public decimal TotalAmount { get; set; }
-        public int TransactionCount { get; set; }
-        public decimal BudgetAmount { get; set; }
-        public decimal RemainingBudget { get; set; }
-        public bool IsOverBudget { get; set; }
-    }
 
     public class BudgetUtilizationDto
     {
@@ -138,7 +128,7 @@ namespace Repositories.ViewModels.FinancialDashboardModel
         public decimal TotalExpenses { get; set; }
         public decimal NetAmount { get; set; }
         public int TransactionCount { get; set; }
-        public List<CategorySummaryDto> CategoryBreakdown { get; set; } = new List<CategorySummaryDto>();
+        public List<EnhancedBudgetDto> CategoryBreakdown { get; set; } = new List<EnhancedBudgetDto>();
         public List<RecentTransactionDto> Transactions { get; set; } = new List<RecentTransactionDto>();
         
         // Carry-over calculations

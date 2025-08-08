@@ -123,11 +123,7 @@ namespace Services.Services.UserService
                 IsSuccess = true,
                 Code = (int)HttpStatusCode.Created,
                 Message = "User created successfully. Verification code sent to email.",
-                Data = new
-                {
-                    Email = user.Email,
-                    UserId = user.UserId
-                }
+                Data = user
             };
         }
 
