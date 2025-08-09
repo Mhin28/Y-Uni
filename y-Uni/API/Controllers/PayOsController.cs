@@ -62,7 +62,7 @@ namespace API.Controllers
 		//	{
 		//		WebhookData data = _payOS.verifyPaymentWebhookData(body);
 		//		var result = await _payOsService.HandleWebhookAsync(body);
-		//		return StatusCode(result.Code, result);
+		//		return Ok();
 		//	}
 		//	catch (Exception ex)
 		//	{

@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -43,9 +43,31 @@
             opacity: 0;
             animation: fadeIn 1.5s ease-in-out forwards;
             animation-delay: 0.3s;
-            margin: 10px 0 0;
+            margin: 10px 0 20px;
             letter-spacing: 1px;
         }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background-color: #ffffff;
+            color: #6e8efb;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            animation-delay: 0.6s;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        }
+
+            .download-btn:hover {
+                background-color: #6e8efb;
+                color: #ffffff;
+                transform: scale(1.05);
+            }
 
         @@keyframes fadeIn {
             0% {
@@ -85,6 +107,7 @@
     <div class="container">
         <h1>Welcome to Y-Uni</h1>
         <p>Master Your Time, Maximize Your Wealth</p>
+        <a href="https://drive.google.com/file/d/11XnBRYqFztjkcZGwcLJ9PmMYuLtchYTY/view?usp=sharing" download class="download-btn">📥 Download APK</a>
     </div>
 </body>
 </html>
