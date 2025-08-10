@@ -176,12 +176,14 @@ namespace Services.Services.UserService
                     return res;
                 }
             }
+            if (!string.IsNullOrEmpty(model.Img))
+                user.Img = model.Img;
             if (!string.IsNullOrEmpty(model.FullName))
                 user.FullName = model.FullName;
             if (!string.IsNullOrEmpty(model.Email))
                 user.Email = model.Email;
-            if (model.DoB.HasValue && model.DoB.Value != default(DateOnly))
-                user.DoB = model.DoB;
+            if (model.DoB != null && model.DoB.HasValue)
+                user.DoB = DateOnly.FromDateTime(model.DoB.Value);
             user.UpdatedAt = DateTime.UtcNow;
 
             await _userRepo.UpdateAsync(user);
@@ -189,13 +191,7 @@ namespace Services.Services.UserService
             res.IsSuccess = true;
             res.Code = (int)HttpStatusCode.OK;
             res.Message = "Cập nhật thành công.";
-            res.Data = new
-            {
-                user.UserId,
-                user.FullName,
-                user.Email,
-                user.DoB
-            };
+            res.Data = user;
             return res;
         }
 

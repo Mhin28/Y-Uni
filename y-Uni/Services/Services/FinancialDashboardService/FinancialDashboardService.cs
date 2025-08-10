@@ -63,7 +63,7 @@ namespace Services.Services.FinancialDashboardService
                     .Sum(e => e.Amount);
 
                 var transactions = expenses
-                    .Where(e => e.ExC != null && e.ExC.Type == "expense")
+                    .Where(e => e.ExC != null)
                     .Select(e =>
                     {
                         var category = categories.FirstOrDefault(c => c.ExCid == e.ExCid);
