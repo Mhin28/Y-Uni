@@ -9,8 +9,8 @@ namespace Repositories.Repositories
 {
     public class InvestmentRepo : IInvestmentRepo
     {
-        private readonly YUniContext _context;
-        public InvestmentRepo(YUniContext context)
+        private readonly YuniBuddyContext _context;
+        public InvestmentRepo(YuniBuddyContext context)
         {
             _context = context;
         }

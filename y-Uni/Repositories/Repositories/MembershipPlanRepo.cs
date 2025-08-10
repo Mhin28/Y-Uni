@@ -11,7 +11,7 @@ namespace Repositories.Repositories
 {
 	public class MembershipPlanRepo : GenericRepository<MembershipPlan>, IMembershipPlanRepo
 	{
-		public MembershipPlanRepo(YUniContext context) : base(context)
+		public MembershipPlanRepo(YuniBuddyContext context) : base(context)
 		{
 		}
 		public async Task<List<MembershipPlan>> GetMembershipPlansByNameAsync(string planName)

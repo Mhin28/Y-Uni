@@ -25,7 +25,7 @@ builder.Services.AddHttpContextAccessor();
 
 
 // Add DbContext to the DI container
-builder.Services.AddDbContext<YUniContext>(options =>
+builder.Services.AddDbContext<YuniBuddyContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.

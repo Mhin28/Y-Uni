@@ -10,7 +10,7 @@ namespace Repositories.Repositories
 {
     public class EventRepo : GenericRepository<Event>, IEventRepo
     {
-        public EventRepo(YUniContext context) : base(context) { }
+        public EventRepo(YuniBuddyContext context) : base(context) { }
 
         public async Task<List<Event>> GetEventsByUserIdAsync(Guid userId)
         {

@@ -9,7 +9,7 @@ namespace Repositories.Repositories
 {
 	public class FinancialAccountRepo : GenericRepository<FinancialAccount>, IFinancialAccountRepo
 	{
-		public FinancialAccountRepo(YUniContext context) : base(context) { }
+		public FinancialAccountRepo(YuniBuddyContext context) : base(context) { }
 
 		public async Task<List<FinancialAccount>> GetByUserIdAsync(Guid userId)
 		{

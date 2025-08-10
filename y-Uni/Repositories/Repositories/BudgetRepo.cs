@@ -6,7 +6,7 @@ namespace Repositories.Repositories
 {
     public class BudgetRepo : GenericRepository<Budget>, IBudgetRepo
     {
-        public BudgetRepo(YUniContext context) : base(context) { }
+        public BudgetRepo(YuniBuddyContext context) : base(context) { }
 
         public async Task<List<Budget>> GetUserBudgetsAsync(Guid userId)
         {

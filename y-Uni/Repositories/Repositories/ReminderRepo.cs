@@ -11,7 +11,7 @@ namespace Repositories.Repositories
 {
 	public class ReminderRepo : GenericRepository<Reminder>, IReminderRepo
 	{
-		public ReminderRepo(YUniContext context) : base(context)
+		public ReminderRepo(YuniBuddyContext context) : base(context)
 		{
 		}
 		public async Task<IEnumerable<Reminder>> GetRemindersByUserIdAsync(Guid userId)

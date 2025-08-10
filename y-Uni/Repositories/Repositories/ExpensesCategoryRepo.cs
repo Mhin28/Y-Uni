@@ -5,6 +5,6 @@ namespace Repositories.Repositories
 {
 	public class ExpensesCategoryRepo : GenericRepository<ExpensesCategory>, IExpensesCategoryRepo
 	{
-		public ExpensesCategoryRepo(YUniContext context) : base(context) { }
+		public ExpensesCategoryRepo(YuniBuddyContext context) : base(context) { }
 	}
 }

@@ -11,7 +11,7 @@ namespace Repositories.Repositories
 {
 	public class ReminderTemplateRepo : GenericRepository<ReminderTemplate>, IReminderTemplateRepo
 	{
-		public ReminderTemplateRepo(YUniContext context) : base(context)
+		public ReminderTemplateRepo(YuniBuddyContext context) : base(context)
 		{
 		}
 
