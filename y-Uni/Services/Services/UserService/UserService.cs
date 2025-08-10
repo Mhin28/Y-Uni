@@ -265,10 +265,12 @@ namespace Services.Services.UserService
                     result.Message = "Invalid or expired code.";
                     return result;
                 }
-
+                if(user.IsVerified != true)
+{
                 user.IsVerified = true;
                 user.VerificationCode = null;
-                user.VerificationCodeExpiry = null;
+                    user.VerificationCodeExpiry = null;
+}
 
                 var updatedUser = await _userRepo.UpdateVerifyAsync(user);
 

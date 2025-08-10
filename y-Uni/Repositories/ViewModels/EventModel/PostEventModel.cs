@@ -12,7 +12,7 @@ namespace Repositories.ViewModels.EventModel
         
         public string Description { get; set; }
         
-        public string RecurrencePattern { get; set; }
+        public string? RecurrencePattern { get; set; }
         
         public DateOnly? RecurrenceEndDate { get; set; }
         
