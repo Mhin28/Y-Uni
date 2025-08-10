@@ -11,7 +11,7 @@ namespace Repositories.Repositories
 {
     public class AssignmentRepo : GenericRepository<Assignment>, IAssignmentRepo
     {
-        public AssignmentRepo(YUniContext context): base(context) { }
+        public AssignmentRepo(YuniBuddyContext context): base(context) { }
 
         public async Task<List<Assignment>> GetAssignmentsByUserIdAsync(Guid userId)
         {

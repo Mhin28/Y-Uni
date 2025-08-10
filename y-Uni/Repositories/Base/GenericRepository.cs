@@ -11,14 +11,14 @@ namespace Repositories.Base
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected YUniContext _context;
+        protected YuniBuddyContext _context;
 
         public GenericRepository()
         {
-            _context ??= new YUniContext();
+            _context ??= new YuniBuddyContext();
         }
 
-        public GenericRepository(YUniContext context)
+        public GenericRepository(YuniBuddyContext context)
         {
             _context = context;
         }

@@ -10,6 +10,6 @@ namespace Repositories.Repositories
 {
 	public class PaymentGatewayRepo : GenericRepository<PaymentGateway>, IPaymentGatewayRepo
 	{
-		public PaymentGatewayRepo(YUniContext context) : base(context) { }
+		public PaymentGatewayRepo(YuniBuddyContext context) : base(context) { }
 	}
 }

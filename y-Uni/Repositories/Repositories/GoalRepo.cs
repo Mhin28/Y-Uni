@@ -9,8 +9,8 @@ namespace Repositories.Repositories
 {
     public class GoalRepo : IGoalRepo
     {
-        private readonly YUniContext _context;
-        public GoalRepo(YUniContext context)
+        private readonly YuniBuddyContext _context;
+        public GoalRepo(YuniBuddyContext context)
         {
             _context = context;
         }

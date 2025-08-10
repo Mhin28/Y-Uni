@@ -10,7 +10,7 @@ namespace Repositories.Repositories
 {
     public class SubjectRepo : GenericRepository<Subject>, ISubjectRepo
     {
-        public SubjectRepo(YUniContext context) : base(context) { }
+        public SubjectRepo(YuniBuddyContext context) : base(context) { }
 
         public async Task<Subject> GetByIdAsync(Guid subjectId)
         {
