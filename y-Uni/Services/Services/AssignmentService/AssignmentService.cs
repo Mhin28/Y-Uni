@@ -164,19 +164,6 @@ namespace Services.Services.AssignmentService
                     return result;
                 }
 
-                // Validate subject is required and exists
-                if (!model.SubjectId.HasValue)
-                {
-                    result.Message = "Subject ID is required";
-                    return result;
-                }
-
-                var subjectExists = await _repo.CheckSubjectExistsAsync(model.SubjectId.Value);
-                if (!subjectExists)
-                {
-                    result.Message = "Subject not found";
-                    return result;
-                }
 
                 var assignment = new Assignment
                 {

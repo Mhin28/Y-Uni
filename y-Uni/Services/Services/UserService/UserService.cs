@@ -123,11 +123,7 @@ namespace Services.Services.UserService
                 IsSuccess = true,
                 Code = (int)HttpStatusCode.Created,
                 Message = "User created successfully. Verification code sent to email.",
-                Data = new
-                {
-                    Email = user.Email,
-                    UserId = user.UserId
-                }
+                Data = user
             };
         }
 
@@ -269,10 +265,12 @@ namespace Services.Services.UserService
                     result.Message = "Invalid or expired code.";
                     return result;
                 }
-
+                if(user.IsVerified != true)
+{
                 user.IsVerified = true;
                 user.VerificationCode = null;
-                user.VerificationCodeExpiry = null;
+                    user.VerificationCodeExpiry = null;
+}
 
                 var updatedUser = await _userRepo.UpdateVerifyAsync(user);
 
