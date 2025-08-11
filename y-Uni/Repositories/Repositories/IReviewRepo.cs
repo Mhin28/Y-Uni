@@ -10,11 +10,9 @@ namespace Repositories.Repositories
     public interface IReviewRepo
     {
         Task<IEnumerable<Review>> GetAllAsync();
-        Task<Review> GetByUserIdAsync(Guid userId);
+        Task<IEnumerable<Review>> GetByUserIdAsync(Guid userId);
+        Task<Review> CreateAsync(Review review);
+        Task<Review> UpdateAsync(Review review);
         Task<Review> GetByIdAsync(Guid reviewId);
-        Task AddAsync(Review review);
-        Task UpdateAsync(Review review);
-        Task DeleteAsync(Review review);
-        Task SaveChangesAsync();
     }
 }

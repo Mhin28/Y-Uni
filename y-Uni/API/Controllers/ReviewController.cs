@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.Services.ReviewServices;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    [Authorize] 
+    [ApiController]
+    [Authorize]
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService _reviewService;
@@ -18,40 +19,43 @@ namespace API.Controllers
             _reviewService = reviewService;
         }
 
-
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _reviewService.GetAllAsync();
-            return Ok(result);
+            var res = await _reviewService.GetAllReviewsAsync();
+            return StatusCode(res.Code, res);
         }
 
-        [HttpGet("user/{userId}")]
+        [HttpGet("user/{userId:guid}")]
         public async Task<IActionResult> GetByUserId(Guid userId)
         {
-            var result = await _reviewService.GetByUserIdAsync(userId);
-            return Ok(result);
+            var res = await _reviewService.GetReviewsByUserIdAsync(userId);
+            return StatusCode(res.Code, res);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateOrUpdate([FromBody] ReviewRequest request)
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromBody] CreateReviewRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _reviewService.CreateOrUpdateAsync(request.UserId, request.Rating, request.Comment);
-            return Ok(result);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _reviewService.CreateReviewAsync(token, request.Rating, request.Comment);
+            return StatusCode(res.Code, res);
         }
 
-        [HttpDelete("{reviewId}")]
-        public async Task<IActionResult> Delete(Guid reviewId)
+        [HttpPut("update/{reviewId:guid}")]
+        public async Task<IActionResult> Update(Guid reviewId, [FromBody] UpdateReviewRequest request)
         {
-            var result = await _reviewService.DeleteAsync(reviewId);
-            return Ok(result);
+            var res = await _reviewService.UpdateReviewAsync(request.UserId, reviewId, request.Rating, request.Comment);
+            return StatusCode(res.Code, res);
         }
     }
 
-    public class ReviewRequest
+    public class CreateReviewRequest
+    {
+        public int Rating { get; set; }
+        public string Comment { get; set; }
+    }
+
+    public class UpdateReviewRequest
     {
         public Guid UserId { get; set; }
         public int Rating { get; set; }

@@ -1,6 +1,6 @@
 ﻿using Repositories.Models;
 using Repositories.ViewModels.ResultModels;
-using Repositories.ViewModels.ReviewModel;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +11,9 @@ namespace Services.Services.ReviewServices
 {
     public interface IReviewService
     {
-        Task<ResultModel> GetAllAsync();
-        Task<ResultModel> GetByUserIdAsync(Guid userId);
-        Task<ResultModel> CreateOrUpdateAsync(Guid userId, int? rating, string comment);
-        Task<ResultModel> DeleteAsync(Guid reviewId);
+        Task<ResultModel> GetAllReviewsAsync();
+        Task<ResultModel> GetReviewsByUserIdAsync(Guid userId);
+        Task<ResultModel> CreateReviewAsync(string token, int rating, string comment);
+        Task<ResultModel> UpdateReviewAsync(Guid userId, Guid reviewId, int rating, string comment);
     }
 }
