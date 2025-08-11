@@ -38,6 +38,7 @@ namespace Repositories
             services.AddScoped<IGoalRepo, GoalRepo>();
             services.AddScoped<IBudgetRepo, BudgetRepo>();
             services.AddScoped<IInvestmentRepo, InvestmentRepo>();
+            services.AddScoped<IReviewRepo, ReviewRepo>();
 
 			return services;
         }
