@@ -18,7 +18,7 @@ namespace Repositories
         {
             var assembly = typeof(DependencyInjection).Assembly;
 
-            services.AddScoped<YUniContext>();
+            services.AddScoped<YuniBuddyContext>();
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IExpensesCategoryRepo, ExpensesCategoryRepo>();
             services.AddScoped<IExpenseRepo, ExpenseRepo>();
@@ -38,6 +38,7 @@ namespace Repositories
             services.AddScoped<IGoalRepo, GoalRepo>();
             services.AddScoped<IBudgetRepo, BudgetRepo>();
             services.AddScoped<IInvestmentRepo, InvestmentRepo>();
+            services.AddScoped<IReviewRepo, ReviewRepo>();
 
 			return services;
         }

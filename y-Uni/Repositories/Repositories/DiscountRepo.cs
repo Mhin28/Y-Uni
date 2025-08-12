@@ -11,7 +11,7 @@ namespace Repositories.Repositories
 {
 	public class DiscountRepo : GenericRepository<Discount>, IDiscountRepo
 	{
-		public DiscountRepo(YUniContext context) : base(context)
+		public DiscountRepo(YuniBuddyContext context) : base(context)
 		{
 		}
 

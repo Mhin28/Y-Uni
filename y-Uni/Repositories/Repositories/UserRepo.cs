@@ -12,8 +12,8 @@ namespace Repositories.Repositories
 {
     public class UserRepo : GenericRepository<User>, IUserRepo
     {
-        private readonly YUniContext _context;
-        public UserRepo(YUniContext context) : base(context)
+        private readonly YuniBuddyContext _context;
+        public UserRepo(YuniBuddyContext context) : base(context)
         {
             _context = context;
         }

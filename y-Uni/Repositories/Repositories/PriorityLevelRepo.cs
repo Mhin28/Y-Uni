@@ -10,7 +10,7 @@ namespace Repositories.Repositories
 {
     public class PriorityLevelRepo : GenericRepository<PriorityLevel>, IPriorityLevelRepo
     {
-        public PriorityLevelRepo(YUniContext context) : base(context) { }
+        public PriorityLevelRepo(YuniBuddyContext context) : base(context) { }
 
         public async Task<PriorityLevel> GetByPriorityIdAsync(byte priorityId)
         {

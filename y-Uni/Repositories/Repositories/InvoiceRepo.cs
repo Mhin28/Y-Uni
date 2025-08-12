@@ -11,7 +11,7 @@ namespace Repositories.Repositories
 {
 	public class InvoiceRepo : GenericRepository<Invoice>, IInvoiceRepo
 	{
-		public InvoiceRepo(YUniContext context) : base(context)
+		public InvoiceRepo(YuniBuddyContext context) : base(context)
 		{
 		}
 

@@ -8,7 +8,7 @@ namespace Repositories.Repositories
 {
 	public class PaymentMethodRepo : GenericRepository<PaymentMethod>, IPaymentMethodRepo
 	{
-		public PaymentMethodRepo(YUniContext context) : base(context) { }
+		public PaymentMethodRepo(YuniBuddyContext context) : base(context) { }
 
 		public async Task<List<PaymentMethod>> GetActiveAsync()
 		{
