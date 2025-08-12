@@ -1,20 +1,21 @@
-﻿using Repositories.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
+using System.Threading.Tasks;
+using Repositories.Models;
 using Repositories.Repositories;
+using Repositories.ViewModels.AutheticateModel;
 using Repositories.ViewModels.ResultModels;
 using Repositories.ViewModels.UserModel;
 using Services.Services.AccountService;
 using Services.Services.AuthenticateService;
+using Services.Services.EmailService;
 using Services.Services.TokenService;
 using Services.Services.Validate;
-using Services.Services.EmailService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.Mail;
-using System.Net;
 
 namespace Services.Services.UserService
 {
@@ -514,62 +515,60 @@ namespace Services.Services.UserService
             return result;
         }
 
-        public async Task<ResultModel> LoginWithGoogleAsync(string idToken)
+        public async Task<ResultModel> LoginWithGoogleAsync(string accessToken)
         {
-            var result = new ResultModel
-            {
-                IsSuccess = false,
-                Code = (int)HttpStatusCode.BadRequest,
-                Message = "Đăng nhập Google thất bại."
-            };
+            var result = new ResultModel { IsSuccess = false, Code = 400, Message = "Đăng nhập Google thất bại." };
+
             try
             {
-                var httpClient = new System.Net.Http.HttpClient();
-                var googleApi = $"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}";
-                var response = await httpClient.GetAsync(googleApi);
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await httpClient.GetAsync("https://www.googleapis.com/oauth2/v3/userinfo");
                 if (!response.IsSuccessStatusCode)
                 {
-                    result.Message = "id_token không hợp lệ.";
+                    result.Message = "Access token không hợp lệ.";
                     return result;
                 }
+
                 var payload = await response.Content.ReadAsStringAsync();
                 var payloadObj = System.Text.Json.JsonDocument.Parse(payload).RootElement;
+
                 var email = payloadObj.GetProperty("email").GetString();
-                var name = payloadObj.TryGetProperty("name", out var n) ? n.GetString() : email;
+                var name = payloadObj.GetProperty("name").GetString();
+                var picture = payloadObj.GetProperty("picture").GetString();
+
                 var user = await _userRepo.GetByEmailAsync(email);
                 if (user == null)
                 {
-                    user = new Repositories.Models.User
+                    user = new User
                     {
                         UserId = Guid.NewGuid(),
                         Email = email,
                         FullName = name,
                         UserName = email,
+                        PasswordHash = Guid.NewGuid().ToString("N"),
+                        Img = picture,
                         IsVerified = true,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
-                        RoleId = 2 
+                        RoleId = 2
                     };
                     await _userRepo.AddAsync(user);
                 }
-                var loginResModel = new Repositories.ViewModels.AutheticateModel.LoginResModel
+
+                var token = _authentocateService.GenerateJWT(new LoginResModel
                 {
                     UserId = user.UserId,
                     FullName = user.FullName,
                     UserName = user.UserName,
                     Email = user.Email,
-                    DoB = user.DoB,
-                    PasswordHash = user.PasswordHash,
-                    LastLogin = user.LastLogin,
-                    Img = user.Img,
-                    RoleId = user.RoleId,
-                    IsVerified = user.IsVerified,
-                    CreatedAt = user.CreatedAt,
-                    UpdatedAt = user.UpdatedAt
-                };
-                var token = _authentocateService.GenerateJWT(loginResModel);
+                    Img = user.Img
+                });
+
                 result.IsSuccess = true;
-                result.Code = (int)HttpStatusCode.OK;
+                result.Code = 200;
                 result.Message = "Đăng nhập Google thành công.";
                 result.Data = new { Token = token, User = user };
             }
@@ -577,7 +576,9 @@ namespace Services.Services.UserService
             {
                 result.Message = $"Lỗi: {ex.Message}";
             }
+
             return result;
         }
+
     }
 }
