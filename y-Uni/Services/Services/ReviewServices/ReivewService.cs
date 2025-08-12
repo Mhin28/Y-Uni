@@ -111,7 +111,44 @@ public class ReviewService : IReviewService
     }
 
    
-    public async Task<ResultModel> UpdateReviewAsync(Guid userId, Guid reviewId, int rating, string comment)
+    public async Task<ResultModel> GetReviewsByTokenAsync(string token)
+    {
+        var result = new ResultModel
+        {
+            IsSuccess = false,
+            Code = (int)HttpStatusCode.NoContent,
+            Message = "No reviews found for this user."
+        };
+
+        if (string.IsNullOrEmpty(token))
+        {
+            result.Code = (int)HttpStatusCode.Unauthorized;
+            result.Message = "Invalid token.";
+            return result;
+        }
+
+        var decoded = _tokenService.decode(token);
+        if (decoded == null || string.IsNullOrEmpty(decoded.userid) || !Guid.TryParse(decoded.userid, out Guid userId))
+        {
+            result.Code = (int)HttpStatusCode.Unauthorized;
+            result.Message = "Invalid token.";
+            return result;
+        }
+
+        var reviews = await _reviewRepo.GetByUserIdAsync(userId);
+        if (reviews == null || !reviews.Any())
+        {
+            return result;
+        }
+
+        result.IsSuccess = true;
+        result.Code = (int)HttpStatusCode.OK;
+        result.Message = "User reviews retrieved successfully.";
+        result.Data = reviews;
+        return result;
+    }
+
+    public async Task<ResultModel> UpdateReviewAsync(string token, Guid reviewId, int rating, string comment)
     {
         var result = new ResultModel
         {
@@ -119,6 +156,21 @@ public class ReviewService : IReviewService
             Code = (int)HttpStatusCode.BadRequest,
             Message = "Failed to update review."
         };
+
+        if (string.IsNullOrEmpty(token))
+        {
+            result.Code = (int)HttpStatusCode.Unauthorized;
+            result.Message = "Invalid token.";
+            return result;
+        }
+
+        var decoded = _tokenService.decode(token);
+        if (decoded == null || string.IsNullOrEmpty(decoded.userid) || !Guid.TryParse(decoded.userid, out Guid userId))
+        {
+            result.Code = (int)HttpStatusCode.Unauthorized;
+            result.Message = "Invalid token.";
+            return result;
+        }
 
         var existingReview = await _reviewRepo.GetByIdAsync(reviewId);
         if (existingReview == null)

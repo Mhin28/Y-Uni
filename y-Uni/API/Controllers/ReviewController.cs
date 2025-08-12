@@ -26,10 +26,11 @@ namespace API.Controllers
             return StatusCode(res.Code, res);
         }
 
-        [HttpGet("user/{userId:guid}")]
-        public async Task<IActionResult> GetByUserId(Guid userId)
+        [HttpGet("user")]
+        public async Task<IActionResult> GetByUserId()
         {
-            var res = await _reviewService.GetReviewsByUserIdAsync(userId);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _reviewService.GetReviewsByTokenAsync(token);
             return StatusCode(res.Code, res);
         }
 
@@ -44,7 +45,8 @@ namespace API.Controllers
         [HttpPut("update/{reviewId:guid}")]
         public async Task<IActionResult> Update(Guid reviewId, [FromBody] UpdateReviewRequest request)
         {
-            var res = await _reviewService.UpdateReviewAsync(request.UserId, reviewId, request.Rating, request.Comment);
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var res = await _reviewService.UpdateReviewAsync(token, reviewId, request.Rating, request.Comment);
             return StatusCode(res.Code, res);
         }
     }
@@ -57,7 +59,6 @@ namespace API.Controllers
 
     public class UpdateReviewRequest
     {
-        public Guid UserId { get; set; }
         public int Rating { get; set; }
         public string Comment { get; set; }
     }
