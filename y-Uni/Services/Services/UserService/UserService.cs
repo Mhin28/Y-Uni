@@ -356,8 +356,9 @@ namespace Services.Services.UserService
                 res.Message = "Không tìm thấy người dùng.";
                 return res;
             }
-            
-            if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+
+            // Check email uniqueness if email is being updated
+            if (!string.IsNullOrEmpty(model.Email) && !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
             {
                 var emailExists = await _userRepo.GetByEmailAsync(model.Email);
                 if (emailExists != null && emailExists.UserId != userId)
@@ -367,22 +368,78 @@ namespace Services.Services.UserService
                     return res;
                 }
             }
-            if (!string.IsNullOrEmpty(model.Img))
-                user.Img = model.Img;
-            if (!string.IsNullOrEmpty(model.FullName))
-                user.FullName = model.FullName;
-            if (!string.IsNullOrEmpty(model.Email))
-                user.Email = model.Email;
-            if (model.DoB != null && model.DoB.HasValue)
-                user.DoB = DateOnly.FromDateTime(model.DoB.Value);
-            user.UpdatedAt = DateTime.UtcNow;
 
-            await _userRepo.UpdateAsync(user);
+            try
+            {
+                // Handle image upload if provided
+                string newImageUrl = null;
+                if (model.Img != null && model.Img.Length > 0)
+                {
+                    // Delete existing avatar if it exists
+                    if (!string.IsNullOrEmpty(user.Img))
+                    {
+                        var existingPublicId = ExtractPublicIdFromUrl(user.Img);
+                        Console.WriteLine($"🗑️ Attempting to delete existing avatar with public ID: '{existingPublicId}' from URL: '{user.Img}'");
 
-            res.IsSuccess = true;
-            res.Code = (int)HttpStatusCode.OK;
-            res.Message = "Cập nhật thành công.";
-            res.Data = user;
+                        if (!string.IsNullOrEmpty(existingPublicId))
+                        {
+                            var deleteResult = await _cloudinaryService.DeleteImageAsync(existingPublicId);
+                            Console.WriteLine($"🗑️ Delete result: Success={deleteResult.IsSuccess}, Message={deleteResult.Message}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("⚠️ Could not extract public ID from existing avatar URL");
+                        }
+                    }
+
+                    // Upload new avatar
+                    Console.WriteLine($"📤 Uploading new avatar for user: {userId}");
+                    var uploadResult = await _cloudinaryService.UploadAvatarAsync(model.Img, userId.ToString());
+
+                    if (!uploadResult.IsSuccess)
+                    {
+                        res.Code = uploadResult.Code;
+                        res.Message = $"Lỗi tải ảnh lên: {uploadResult.Message}";
+                        return res;
+                    }
+
+                    // Extract secure URL from upload result
+                    dynamic uploadData = uploadResult.Data;
+                    newImageUrl = uploadData.SecureUrl;
+                    string publicId = uploadData.PublicId;
+
+                    Console.WriteLine($"📤 Upload successful - URL: {newImageUrl}, PublicId: {publicId}");
+                }
+
+                // Update user fields
+                if (newImageUrl != null)
+                    user.Img = newImageUrl;
+
+                if (!string.IsNullOrEmpty(model.FullName))
+                    user.FullName = model.FullName;
+
+                if (!string.IsNullOrEmpty(model.Email))
+                    user.Email = model.Email;
+
+                if (model.DoB != null && model.DoB.HasValue)
+                    user.DoB = DateOnly.FromDateTime(model.DoB.Value);
+
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _userRepo.UpdateAsync(user);
+
+                res.IsSuccess = true;
+                res.Code = (int)HttpStatusCode.OK;
+                res.Message = "Cập nhật thành công.";
+                res.Data = user;
+            }
+            catch (Exception ex)
+            {
+                res.Code = (int)HttpStatusCode.InternalServerError;
+                res.Message = $"Lỗi khi cập nhật thông tin: {ex.Message}";
+                Console.WriteLine($"Error in UpdateAccountLogin: {ex.Message}");
+            }
+
             return res;
         }
 

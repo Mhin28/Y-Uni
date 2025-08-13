@@ -64,10 +64,10 @@ namespace API.Controllers
 		#region Filtering
 
 		// GET: api/Invoice/user/{userId}
-		[HttpGet("user/{userId:guid}")]
-		public async Task<IActionResult> GetByUserId(Guid userId)
+		[HttpGet("current-user")]
+		public async Task<IActionResult> GetByUserId()
 		{
-			var result = await _invoiceService.GetInvoicesByUserIdAsync(userId);
+			var result = await _invoiceService.GetInvoicesByUserIdAsync();
 			return StatusCode(result.Code, result);
 		}
 

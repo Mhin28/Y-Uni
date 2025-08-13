@@ -41,7 +41,8 @@ namespace API.Controllers
         }
 
         [HttpPut("update-account")]
-        public async Task<IActionResult> UpdateAccount([FromBody] UpdateUserModel model)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateAccount([FromForm] UpdateUserModel model)
         {
             string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var res = await _userService.UpdateAccountLogin(token, model);
