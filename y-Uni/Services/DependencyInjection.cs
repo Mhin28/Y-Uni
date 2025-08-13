@@ -32,6 +32,8 @@ using Services.Services.ContextService;
 using Services.Services.ConflictDetectionService;
 using Services.Services.PayOsService;
 using Services.Services.ReviewServices;
+using CloudinaryDotNet;
+using Services.Services.CloudinaryService;
 
 namespace Services
 {
@@ -67,7 +69,7 @@ namespace Services
             services.AddScoped<IInvestmentService, InvestmentService>();
             services.AddScoped<IPayOsService, PayOsService>();
             services.AddScoped<IReviewService, ReviewService>();
-
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
             // AI Services
             services.AddHttpClient();
             services.AddScoped<IGeminiAIService, GeminiAIService>();
