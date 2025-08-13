@@ -16,7 +16,7 @@ namespace Services.Services.InvoiceService
 		Task<ResultModel> AddAsync(PostInvoiceModel model);
 		Task<ResultModel> UpdateAsync(InvoiceModel model);
 		Task<ResultModel> DeleteAsync(Guid id);
-		Task<ResultModel> GetInvoicesByUserIdAsync(Guid customerId);
+		Task<ResultModel> GetInvoicesByUserIdAsync();
 		Task<ResultModel> GetInvoicesByPaymentMethodAsync(Guid paymentMethodId);
 		Task<ResultModel> GetInvoicesByMembershipPlanAsync(Guid membershipPlanId);
 		Task<ResultModel> GetInvoicesByDiscountAsync(Guid discountId);

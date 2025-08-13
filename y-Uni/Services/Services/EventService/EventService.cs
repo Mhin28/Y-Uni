@@ -110,9 +110,25 @@ namespace Services.Services.EventService
             try
             {
                 var events = await _repo.GetUpcomingEventsByUserIdAsync(userId, startDate, endDate);
+                var expandedEvents = new List<object>();
+                foreach (var eventItem in events)
+                {
+                    if (eventItem.RecurrencePattern != null && eventItem.RecurrencePattern != "none")
+                    {
+                        // Generate occurrences for the next 3 months
+                        var occurrences = GenerateEventOccurrences(eventItem, DateTime.Now, DateTime.Now.AddMonths(3));
+                        expandedEvents.AddRange(occurrences);
+                    }
+                    else
+                    {
+                        // Single occurrence event
+                        expandedEvents.Add(eventItem);
+                    }
+                }
+
                 result.IsSuccess = true;
                 result.Code = (int)HttpStatusCode.OK;
-                result.Data = events;
+                result.Data = expandedEvents;
             }
             catch (Exception ex)
             {

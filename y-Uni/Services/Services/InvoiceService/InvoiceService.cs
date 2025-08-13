@@ -1,22 +1,26 @@
-﻿using Repositories.Models;
-using Repositories.Repositories;
-using Repositories.ViewModels.InvoiceModel;
-using Repositories.ViewModels.ResultModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Repositories.Models;
+using Repositories.Repositories;
+using Repositories.ViewModels.InvoiceModel;
+using Repositories.ViewModels.ResultModels;
+using Services.Services.UserContextService;
 
 namespace Services.Services.InvoiceService
 {
 	public class InvoiceService : IInvoiceService
 	{
 		private readonly IInvoiceRepo _repo;
-		public InvoiceService(IInvoiceRepo repo)
+        private readonly IUserContextService _userContextService;
+
+        public InvoiceService(IInvoiceRepo repo , IUserContextService userContextService)
 		{
 			_repo = repo;
+			_userContextService = userContextService;
 		}
 
 		public async Task<ResultModel> GetAllAsync()
@@ -197,12 +201,13 @@ namespace Services.Services.InvoiceService
 			return result;
 		}
 
-		public async Task<ResultModel> GetInvoicesByUserIdAsync(Guid userId)
+		public async Task<ResultModel> GetInvoicesByUserIdAsync()
 		{
 			var result = new ResultModel();
 			try
 			{
-				var invoices = await _repo.GetInvoicesByUserIdAsync(userId);
+                var userId = _userContextService.GetCurrentUserId();
+                var invoices = await _repo.GetInvoicesByUserIdAsync(userId);
 				if (invoices == null || !invoices.Any())
 				{
 					result.IsSuccess = false;
