@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.ViewModels.UserModel;
+using Services.Services.CloudinaryService;
 using Services.Services.UserService;
 using System.Net;
 using System.Net.Mail;
@@ -13,10 +14,12 @@ namespace API.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ICloudinaryService cloudinaryService)
         {
             _userService = userService;
+            _cloudinaryService = cloudinaryService;
         }
 
         [AllowAnonymous]
@@ -94,6 +97,39 @@ namespace API.Controllers
         public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginModel model)
         {
             var result = await _userService.LoginWithGoogleAsync(model.IdToken);
+            return StatusCode(result.Code, result);
+        }
+
+
+        [HttpPost("upload-avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            string token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var result = await _userService.UpdateAvatarAsync(token, file);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpPost("test-upload")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestUpload(IFormFile file)
+        {
+            var result = await _cloudinaryService.TestUploadAsync(file);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpPost("upload-image")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadImage(IFormFile file, [FromQuery] string folder = "general")
+        {
+            var result = await _cloudinaryService.UploadImageAsync(file, folder);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpDelete("delete-image")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeleteImage([FromQuery] string publicId)
+        {
+            var result = await _cloudinaryService.DeleteImageAsync(publicId);
             return StatusCode(result.Code, result);
         }
 

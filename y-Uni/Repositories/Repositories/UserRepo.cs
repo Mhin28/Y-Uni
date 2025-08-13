@@ -75,5 +75,18 @@ namespace Repositories.Repositories
             await _context.SaveChangesAsync();
             return existingUser;
         }
+
+        public async Task<User> UpdateAvatarAsync(Guid userId, string imageUrl)
+        {
+            var existingUser = await _context.Users.FindAsync(userId);
+            if (existingUser == null)
+                return null;
+
+            existingUser.Img = imageUrl;
+            existingUser.UpdatedAt = DateTime.UtcNow;
+            _context.Entry(existingUser).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return existingUser;
+        }
     }
 }

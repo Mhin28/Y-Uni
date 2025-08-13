@@ -1,4 +1,5 @@
-﻿using Repositories.ViewModels.ResultModels;
+﻿using Microsoft.AspNetCore.Http;
+using Repositories.ViewModels.ResultModels;
 using Repositories.ViewModels.UserModel;
 using System;
 using System.Collections.Generic;
@@ -20,5 +21,6 @@ namespace Services.Services.UserService
         Task<ResultModel> SendForgotPasswordCodeAsync(string email);
         Task<ResultModel> ResetPasswordWithCodeAsync(ChangePasswordModel model);
         Task<ResultModel> LoginWithGoogleAsync(string idToken);
+        Task<ResultModel> UpdateAvatarAsync(string token, IFormFile file);
     }
 }
