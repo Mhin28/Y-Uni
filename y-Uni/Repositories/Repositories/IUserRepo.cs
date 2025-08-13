@@ -18,5 +18,6 @@ namespace Repositories.Repositories
         Task<User?> GetByIdAsync(Guid userId);
         Task<bool> CheckRoleExists(int roleId);
         Task<User> UpdateVerifyAsync(User model);
+        Task<User> UpdateAvatarAsync(Guid userId, string imageUrl);
     }
 }
