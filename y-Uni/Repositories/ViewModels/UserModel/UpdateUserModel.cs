@@ -1,11 +1,12 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace Repositories.ViewModels.UserModel
 {
     public class UpdateUserModel
     {
-        public string? Img { get; set; }
+        public IFormFile? Img { get; set; }
 
         public string FullName { get; set; }
 
