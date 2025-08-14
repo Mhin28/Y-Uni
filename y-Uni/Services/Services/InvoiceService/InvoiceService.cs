@@ -208,13 +208,6 @@ namespace Services.Services.InvoiceService
 			{
                 var userId = _userContextService.GetCurrentUserId();
                 var invoices = await _repo.GetInvoicesByUserIdAsync(userId);
-				if (invoices == null || !invoices.Any())
-				{
-					result.IsSuccess = false;
-					result.Code = (int)HttpStatusCode.NotFound;
-					result.Message = "No invoices found for the specified user.";
-					return result;
-				}
 				result.IsSuccess = true;
 				result.Code = (int)HttpStatusCode.OK;
 				result.Data = invoices;
