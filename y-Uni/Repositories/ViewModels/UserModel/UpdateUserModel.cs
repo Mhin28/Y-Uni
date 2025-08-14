@@ -8,9 +8,9 @@ namespace Repositories.ViewModels.UserModel
     {
         public IFormFile? Img { get; set; }
 
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         public DateTime? DoB { get; set; }
 
