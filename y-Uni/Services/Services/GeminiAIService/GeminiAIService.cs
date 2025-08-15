@@ -461,6 +461,12 @@ Suggested default times:
                 option.EstimatedTimeMinutes = option.Type == "assignment" ? 60 : 30;
             }
             
+            // Cap assignment estimated time at 10 hours (600 minutes)
+            if (option.Type == "assignment" && option.EstimatedTimeMinutes > 600)
+            {
+                option.EstimatedTimeMinutes = 600;
+            }
+            
             // Fix empty titles
             if (string.IsNullOrEmpty(option.Title) && (option.Type == "assignment" || option.Type == "event"))
             {
