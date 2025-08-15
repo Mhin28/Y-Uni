@@ -11,6 +11,7 @@ namespace Services.Services.UserService
 {
     public interface IUserService
     {
+        Task<ResultModel> GetAllUser();
         Task<ResultModel> CreateUser(string token, CreateUserModel model);
         Task<ResultModel> UpdateAccountLogin(string token, UpdateUserModel model);
         Task<ResultModel> GetUserByIdAsync(Guid userId);

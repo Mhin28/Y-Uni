@@ -22,6 +22,13 @@ namespace API.Controllers
             _cloudinaryService = cloudinaryService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _userService.GetAllUser();
+            return StatusCode(result.Code, result);
+        }
+
         [AllowAnonymous]
         [Route("create-user")]
         [HttpPost]
