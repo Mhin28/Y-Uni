@@ -48,6 +48,26 @@ namespace Services.Services.UserService
             _emailService = emailService;
             _cloudinaryService = cloudinaryService;
         }
+
+        public async Task<ResultModel> GetAllUser()
+        {
+            var result = new ResultModel();
+            try
+            {
+                var users = await _userRepo.GetAllUser();
+                result.IsSuccess = true;
+                result.Code = (int)HttpStatusCode.OK;
+                result.Data = users;
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Code = (int)HttpStatusCode.InternalServerError;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+
         public async Task<ResultModel> CreateUser(string token, CreateUserModel model)
         {
             var res = new ResultModel
