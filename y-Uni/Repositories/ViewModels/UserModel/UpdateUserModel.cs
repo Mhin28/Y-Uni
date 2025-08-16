@@ -6,6 +6,7 @@ namespace Repositories.ViewModels.UserModel
 {
     public class UpdateUserModel
     {
+        public Guid? UserId { get; set; }
         public IFormFile? Img { get; set; }
 
         public string? FullName { get; set; }
@@ -14,6 +15,6 @@ namespace Repositories.ViewModels.UserModel
 
         public DateTime? DoB { get; set; }
 
-
+        public int? RoleId { get; set; }
     }
 } 

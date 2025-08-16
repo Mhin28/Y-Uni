@@ -362,14 +362,29 @@ namespace Services.Services.UserService
                 return res;
             }
 
-            if (!Guid.TryParse(decodedUser.userid, out Guid userId))
+            if (!Guid.TryParse(decodedUser.userid, out Guid tokenUserId))
             {
                 res.Code = (int)HttpStatusCode.Unauthorized;
                 res.Message = "Token không hợp lệ.";
                 return res;
             }
 
-            var user = await _userRepo.GetByIdAsync(userId);
+            // Determine which user to update
+            Guid userIdToUpdate;
+            if (model.UserId != null)
+            {
+                // Update the specified user
+                userIdToUpdate = model.UserId.Value;
+                Console.WriteLine($"📝 Updating user ID from model: {userIdToUpdate}");
+            }
+            else
+            {
+                // Update the current user from token
+                userIdToUpdate = tokenUserId;
+                Console.WriteLine($"📝 Updating current user from token: {userIdToUpdate}");
+            }
+
+            var user = await _userRepo.GetByIdAsync(userIdToUpdate);
             if (user == null)
             {
                 res.Code = (int)HttpStatusCode.NotFound;
@@ -381,7 +396,7 @@ namespace Services.Services.UserService
             if (!string.IsNullOrEmpty(model.Email) && !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
             {
                 var emailExists = await _userRepo.GetByEmailAsync(model.Email);
-                if (emailExists != null && emailExists.UserId != userId)
+                if (emailExists != null && emailExists.UserId != userIdToUpdate)
                 {
                     res.Code = (int)HttpStatusCode.Conflict;
                     res.Message = "Email đã được sử dụng.";
@@ -413,8 +428,8 @@ namespace Services.Services.UserService
                     }
 
                     // Upload new avatar
-                    Console.WriteLine($"📤 Uploading new avatar for user: {userId}");
-                    var uploadResult = await _cloudinaryService.UploadAvatarAsync(model.Img, userId.ToString());
+                    Console.WriteLine($"📤 Uploading new avatar for user: {userIdToUpdate}");
+                    var uploadResult = await _cloudinaryService.UploadAvatarAsync(model.Img, userIdToUpdate.ToString());
 
                     if (!uploadResult.IsSuccess)
                     {
@@ -443,6 +458,9 @@ namespace Services.Services.UserService
 
                 if (model.DoB != null && model.DoB.HasValue)
                     user.DoB = DateOnly.FromDateTime(model.DoB.Value);
+
+                if (model.RoleId != null)
+                    user.RoleId = model.RoleId;
 
                 user.UpdatedAt = DateTime.UtcNow;
 
